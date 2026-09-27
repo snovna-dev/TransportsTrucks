@@ -1,20 +1,29 @@
-import { PDFParse } from "pdf-parse";
+import { readFile } from "node:fs/promises";
+import { extractTextItems, type StructuredTextItem } from "unpdf";
+
+export interface PdfLayoutTextItem extends StructuredTextItem {}
 
 export interface PdfExtractionResult {
   text: string;
+  layoutText: string;
   pageCount: number;
   hasText: boolean;
+  items: PdfLayoutTextItem[][];
 }
 
 export class PdfExtractionError extends Error {
   constructor(message: string, options?: { cause?: unknown }) {
     super(message);
     this.name = "PdfExtractionError";
+
     if (options?.cause) {
       (this as Error & { cause?: unknown }).cause = options.cause;
     }
   }
 }
+
+const Y_TOLERANCE = 2.0;
+const COLUMN_GAP = 8;
 
 function normalizeExtractedText(text: string): string {
   return text
@@ -27,11 +36,74 @@ function normalizeExtractedText(text: string): string {
     .trim();
 }
 
+interface LineGroup {
+  y: number;
+  items: PdfLayoutTextItem[];
+}
+
+function groupItemsIntoLines(items: PdfLayoutTextItem[]): LineGroup[] {
+  const ordered = items
+    .filter((item) => item.str.trim().length > 0)
+    .slice()
+    .sort((a, b) => b.y - a.y || a.x - b.x);
+
+  const groups: LineGroup[] = [];
+
+  for (const item of ordered) {
+    const current = groups[groups.length - 1];
+
+    if (current && Math.abs(current.y - item.y) <= Y_TOLERANCE) {
+      current.items.push(item);
+      current.y =
+        current.items.reduce((sum, value) => sum + value.y, 0) /
+        current.items.length;
+      continue;
+    }
+
+    groups.push({ y: item.y, items: [item] });
+  }
+
+  return groups;
+}
+
+function buildLayoutLine(items: PdfLayoutTextItem[]): string {
+  const ordered = items.slice().sort((a, b) => a.x - b.x);
+  let output = "";
+  let previousEnd = 0;
+
+  ordered.forEach((item, index) => {
+    if (index === 0) {
+      output = item.str.trim();
+      previousEnd = item.x + item.width;
+      return;
+    }
+
+    const gap = item.x - previousEnd;
+    output += gap >= COLUMN_GAP ? "    " : " ";
+    output += item.str.trim();
+    previousEnd = item.x + item.width;
+  });
+
+  return output.trimEnd();
+}
+
+function buildPageLayout(items: PdfLayoutTextItem[]): string {
+  return groupItemsIntoLines(items)
+    .map((group) => buildLayoutLine(group.items))
+    .filter(Boolean)
+    .join("\n");
+}
+
+function buildDocumentLayout(itemsByPage: PdfLayoutTextItem[][]): string {
+  return normalizeExtractedText(
+    itemsByPage.map((pageItems) => buildPageLayout(pageItems)).join("\n\n"),
+  );
+}
+
 /**
- * Extracts text from a digital PDF.
- *
- * This function is intentionally server-side only. Do not import it from a
- * Client Component because pdf-parse depends on Node/server capabilities.
+ * Extracts text from a digital PDF and reconstructs the page using the X/Y
+ * coordinates returned by PDF.js. The resulting `text` keeps column gaps so
+ * table-oriented parsers can distinguish fields safely.
  */
 export async function extractPdfText(
   input: Buffer | Uint8Array,
@@ -40,47 +112,39 @@ export async function extractPdfText(
     throw new PdfExtractionError("El archivo PDF está vacío.");
   }
 
-  const data = input instanceof Buffer ? input : Buffer.from(input);
-  const parser = new PDFParse({ data });
-
   try {
-    const [textResult, infoResult] = await Promise.all([
-      parser.getText(),
-      parser.getInfo({ parsePageInfo: true }),
-    ]);
+    const data = new Uint8Array(input);
+    const result = await extractTextItems(data);
+    const layoutText = buildDocumentLayout(result.items);
 
-    const text = normalizeExtractedText(textResult.text ?? "");
-    const pageCount = infoResult.total ?? 0;
-
-    if (!text) {
+    if (!layoutText) {
       throw new PdfExtractionError(
         "No se encontró texto extraíble en el PDF. El archivo podría estar escaneado o protegido.",
       );
     }
 
     return {
-      text,
-      pageCount,
+      text: layoutText,
+      layoutText,
+      pageCount: result.totalPages,
       hasText: true,
+      items: result.items,
     };
   } catch (error) {
     if (error instanceof PdfExtractionError) {
       throw error;
     }
 
-    throw new PdfExtractionError("No fue posible extraer el texto del PDF.", {
-      cause: error,
-    });
-  } finally {
-    await parser.destroy();
+    throw new PdfExtractionError(
+      "No fue posible extraer el texto del PDF.",
+      { cause: error },
+    );
   }
 }
 
-/**
- * Convenience helper for tests and scripts that receive a file path.
- */
-export async function extractPdfTextFromFile(filePath: string): Promise<PdfExtractionResult> {
-  const { readFile } = await import("node:fs/promises");
+export async function extractPdfTextFromFile(
+  filePath: string,
+): Promise<PdfExtractionResult> {
   const buffer = await readFile(filePath);
   return extractPdfText(buffer);
 }

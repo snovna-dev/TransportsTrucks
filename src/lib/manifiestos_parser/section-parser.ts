@@ -1,5 +1,5 @@
-import { MANIFEST_SECTION_ALIASES } from "../manifiestos_archivos/manifest-field-aliases";
-import type { ManifestSection } from "../manifiestos_archivos/manifest-extraction";
+import { MANIFEST_SECTION_ALIASES } from "./manifest-field-aliases";
+import type { ManifestSection } from "../../types/manifest-extraction";
 
 export interface ParsedLine {
   index: number;
@@ -20,10 +20,6 @@ export interface ParsedSections {
   sections: ParsedSection[];
 }
 
-/**
- * Normalization used for comparisons. Spaces are preserved because the PDF
- * extractor must keep the horizontal layout of table columns.
- */
 export function normalizePdfText(value: string): string {
   return value
     .normalize("NFD")
@@ -34,37 +30,18 @@ export function normalizePdfText(value: string): string {
 }
 
 export function normalizeLine(value: string): string {
-  return normalizePdfText(value).replace(/\s+$/g, "").trim();
+  return normalizePdfText(value).replace(/\s+/g, " ").trim();
 }
 
 export function sameText(value: string, expected: string): boolean {
   return normalizeLine(value) === normalizeLine(expected);
 }
 
-export function containsAlias(line: string, aliases: readonly string[]): string | null {
-  const normalized = normalizePdfText(line);
-
-  const ordered = [...aliases].sort(
-    (a, b) => normalizePdfText(b).length - normalizePdfText(a).length,
-  );
-
-  for (const alias of ordered) {
-    if (normalized.includes(normalizePdfText(alias))) {
-      return alias;
-    }
-  }
-
-  return null;
-}
-
-/**
- * A section title must match the complete normalized line. Field labels such
- * as "MANIFIESTO" therefore do not become false sections.
- */
 export function detectSectionFromLine(line: string): ManifestSection | null {
   const normalized = normalizeLine(line);
-
-  const sections = Object.keys(MANIFEST_SECTION_ALIASES) as ManifestSection[];
+  const sections = Object.keys(
+    MANIFEST_SECTION_ALIASES,
+  ) as ManifestSection[];
 
   for (const section of sections) {
     if (
@@ -80,42 +57,32 @@ export function detectSectionFromLine(line: string): ManifestSection | null {
 }
 
 export function parseSections(text: string): ParsedSections {
-  const rawLines = text
+  const lines: ParsedLine[] = text
     .replace(/\r\n/g, "\n")
     .replace(/\r/g, "\n")
-    .split("\n");
+    .split("\n")
+    .map((raw) => ({ raw, normalized: normalizeLine(raw) }))
+    .filter((line) => line.normalized.length > 0)
+    .map((line, index) => ({ ...line, index }));
 
-  const lines: ParsedLine[] = rawLines
-    .map((raw, index) => ({
-      index,
-      raw,
-      normalized: normalizeLine(raw),
-    }))
-    .filter((line) => line.normalized.length > 0);
-
-  const starts: Array<{ section: ManifestSection; line: ParsedLine }> = [];
-
-  for (const line of lines) {
+  const starts = lines.flatMap((line) => {
     const section = detectSectionFromLine(line.raw);
-    if (section) starts.push({ section, line });
-  }
+    return section ? [{ section, line }] : [];
+  });
 
-  const sections = starts.map((current, index) => {
+  const sections: ParsedSection[] = starts.map((current, index) => {
     const next = starts[index + 1];
-    const startIndex = lines.findIndex((line) => line.index === current.line.index);
-    const nextIndex = next
-      ? lines.findIndex((line) => line.index === next.line.index)
-      : lines.length;
-
-    const sectionLines = lines.slice(startIndex, nextIndex);
+    const startPosition = current.line.index;
+    const nextPosition = next ? next.line.index : lines.length;
+    const sectionLines = lines.slice(startPosition, nextPosition);
 
     return {
       section: current.section,
       startLine: current.line.index,
-      endLine: next ? next.line.index - 1 : current.line.index + sectionLines.length,
+      endLine: next ? next.line.index - 1 : lines.length - 1,
       lines: sectionLines,
       rawText: sectionLines.map((line) => line.raw).join("\n"),
-    } satisfies ParsedSection;
+    };
   });
 
   return { lines, sections };
@@ -129,14 +96,13 @@ export function getSection(
 }
 
 /**
- * Splits a layout-preserving PDF line. Two or more spaces are column
- * separators; a single space is part of the value.
+ * Splits a reconstructed layout line where >= 2 spaces mean a column gap.
  */
 export function splitLayoutColumns(line: string): string[] {
   return line
     .trim()
     .split(/\s{2,}/)
-    .map((part) => part.trim())
+    .map((value) => value.trim())
     .filter(Boolean);
 }
 
@@ -154,9 +120,6 @@ export function findLineIndex(
   return lines.findIndex(predicate);
 }
 
-/**
- * Returns the first non-empty line after a given source line.
- */
 export function nextLine(
   lines: ParsedLine[],
   sourceIndex: number,
@@ -165,10 +128,6 @@ export function nextLine(
   return lines[sourceIndex + offset];
 }
 
-/**
- * Search a line for a label while preserving enough information to recover
- * the original text around that label.
- */
 export function locateAlias(
   line: string,
   aliases: readonly string[],
@@ -182,6 +141,7 @@ export function locateAlias(
   for (const alias of ordered) {
     const normalizedAlias = normalizePdfText(alias);
     const start = normalizedLine.indexOf(normalizedAlias);
+
     if (start >= 0) {
       return {
         alias,

@@ -1,0 +1,230 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ManifestStatus {
+  UPLOADED
+  PROCESSING
+  REVIEW_REQUIRED
+  COMPLETED
+  ERROR
+}
+
+enum ExtractionReviewStatus {
+  PENDING
+  IN_REVIEW
+  APPROVED
+  REJECTED
+}
+
+model Company {
+  id        BigInt   @id @default(autoincrement())
+  nit       String   @unique @db.VarChar(30)
+  name      String   @db.VarChar(200)
+  address   String?  @db.VarChar(250)
+  phone     String?  @db.VarChar(50)
+  city      String?  @db.VarChar(100)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt DateTime? @map("updated_at") @db.Timestamp(6)
+
+  manifests Manifest[]
+
+  @@map("companies")
+}
+
+model Driver {
+  id                   BigInt   @id @default(autoincrement())
+  identificationNumber String   @unique @map("identification_number") @db.VarChar(50)
+  fullName             String   @map("full_name") @db.VarChar(200)
+  licenseCategory      String?  @map("license_category") @db.VarChar(20)
+  address              String?  @db.VarChar(250)
+  phone                String?  @db.VarChar(50)
+  city                 String?  @db.VarChar(100)
+  createdAt            DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt            DateTime? @map("updated_at") @db.Timestamp(6)
+
+  manifests Manifest[]
+
+  @@map("drivers")
+}
+
+model VehicleHolder {
+  id                   BigInt   @id @default(autoincrement())
+  identificationNumber String   @unique @map("identification_number") @db.VarChar(50)
+  fullName             String   @map("full_name") @db.VarChar(200)
+  address              String?  @db.VarChar(250)
+  phone                String?  @db.VarChar(50)
+  city                 String?  @db.VarChar(100)
+  createdAt            DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt            DateTime? @map("updated_at") @db.Timestamp(6)
+
+  manifests Manifest[]
+
+  @@map("vehicle_holders")
+}
+
+model ManifestHolder {
+  id                   BigInt   @id @default(autoincrement())
+  identificationNumber String   @unique @map("identification_number") @db.VarChar(50)
+  fullName             String   @map("full_name") @db.VarChar(200)
+  address              String?  @db.VarChar(250)
+  phone                String?  @db.VarChar(50)
+  city                 String?  @db.VarChar(100)
+  createdAt            DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt            DateTime? @map("updated_at") @db.Timestamp(6)
+
+  manifests Manifest[]
+
+  @@map("manifest_holders")
+}
+
+model Vehicle {
+  id                    BigInt    @id @default(autoincrement())
+  plate                 String    @unique @db.VarChar(10)
+  brand                 String?   @db.VarChar(100)
+  semiTrailerPlate      String?   @map("semi_trailer_plate") @db.VarChar(10)
+  configuration         String?   @db.VarChar(100)
+  emptyWeight           Decimal?  @map("empty_weight") @db.Decimal(12, 2)
+  soatPolicyNumber      String?   @map("soat_policy_number") @db.VarChar(100)
+  soatInsuranceCompany  String?   @map("soat_insurance_company") @db.VarChar(150)
+  soatExpirationDate    DateTime? @map("soat_expiration_date") @db.Date
+  createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt             DateTime? @map("updated_at") @db.Timestamp(6)
+
+  manifests Manifest[]
+
+  @@map("vehicles")
+}
+
+model PersonOrCompany {
+  id                   BigInt   @id @default(autoincrement())
+  identificationNumber String?  @unique @map("identification_number") @db.VarChar(50)
+  name                 String   @db.VarChar(200)
+  address              String?  @db.VarChar(250)
+  phone                String?  @db.VarChar(50)
+  city                 String?  @db.VarChar(100)
+  createdAt            DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt            DateTime? @map("updated_at") @db.Timestamp(6)
+
+  cargoOwnerManifests Manifest[] @relation("CargoOwner")
+  senderManifests     Manifest[] @relation("Sender")
+  recipientManifests  Manifest[] @relation("Recipient")
+
+  @@map("persons_or_companies")
+}
+
+model Manifest {
+  id                    BigInt   @id @default(autoincrement())
+  companyId             BigInt   @map("company_id")
+  manifestNumber        String   @unique @map("manifest_number") @db.VarChar(50)
+  authorizationNumber   String   @unique @map("authorization_number") @db.VarChar(50)
+  issueDate             DateTime @map("issue_date") @db.Date
+  manifestType          String?  @map("manifest_type") @db.VarChar(100)
+  origin                String?  @db.VarChar(150)
+  intermediateCity      String?  @map("intermediate_city") @db.VarChar(150)
+  destination           String?  @db.VarChar(150)
+
+  driverId              BigInt? @map("driver_id")
+  vehicleId             BigInt? @map("vehicle_id")
+  vehicleHolderId       BigInt? @map("vehicle_holder_id")
+  manifestHolderId      BigInt? @map("manifest_holder_id")
+  cargoOwnerId          BigInt? @map("cargo_owner_id")
+  senderId              BigInt? @map("sender_id")
+  recipientId            BigInt? @map("recipient_id")
+
+  policyOwnerName       String?  @map("policy_owner_name") @db.VarChar(200)
+
+  totalTripValue        Decimal? @map("total_trip_value") @db.Decimal(15, 2)
+  withholdingTax        Decimal? @map("withholding_tax") @db.Decimal(15, 2)
+  icaWithholding        Decimal? @map("ica_withholding") @db.Decimal(15, 2)
+  netValueToPay         Decimal? @map("net_value_to_pay") @db.Decimal(15, 2)
+  advanceValue          Decimal? @map("advance_value") @db.Decimal(15, 2)
+  balanceToPay          Decimal? @map("balance_to_pay") @db.Decimal(15, 2)
+
+  paymentLocation       String?  @map("payment_location") @db.VarChar(150)
+  paymentDate           DateTime? @map("payment_date") @db.Date
+
+  loadingPaidBy         String?  @map("loading_paid_by") @db.VarChar(100)
+  unloadingPaidBy       String?  @map("unloading_paid_by") @db.VarChar(100)
+
+  agreedValueInWords    String?  @map("agreed_value_in_words") @db.VarChar(500)
+  recommendations       String?
+
+  pdfFileName           String?  @map("pdf_file_name") @db.VarChar(255)
+  pdfFileUrl            String?  @map("pdf_file_url") @db.VarChar(500)
+  pdfFileHash           String?  @map("pdf_file_hash") @db.VarChar(128)
+
+  status                ManifestStatus @default(UPLOADED)
+
+  createdAt             DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt             DateTime? @map("updated_at") @db.Timestamp(6)
+
+  company               Company        @relation(fields: [companyId], references: [id])
+  driver                Driver?        @relation(fields: [driverId], references: [id])
+  vehicle               Vehicle?       @relation(fields: [vehicleId], references: [id])
+  vehicleHolder         VehicleHolder? @relation(fields: [vehicleHolderId], references: [id])
+  manifestHolder        ManifestHolder? @relation(fields: [manifestHolderId], references: [id])
+  cargoOwner            PersonOrCompany? @relation("CargoOwner", fields: [cargoOwnerId], references: [id])
+  sender                PersonOrCompany? @relation("Sender", fields: [senderId], references: [id])
+  recipient             PersonOrCompany? @relation("Recipient", fields: [recipientId], references: [id])
+
+  cargo                 Cargo?
+  processing            ManifestProcessing?
+
+  @@index([companyId])
+  @@index([issueDate])
+  @@index([driverId])
+  @@index([vehicleId])
+  @@index([vehicleHolderId])
+  @@index([manifestHolderId])
+  @@index([senderId])
+  @@index([recipientId])
+  @@index([cargoOwnerId])
+  @@index([status])
+  @@index([status, issueDate])
+  @@map("manifests")
+}
+
+model Cargo {
+  id                BigInt   @id @default(autoincrement())
+  manifestId        BigInt   @unique @map("manifest_id")
+  remittanceNumber  String   @map("remittance_number") @db.VarChar(50)
+  measurementUnit   String?  @map("measurement_unit") @db.VarChar(50)
+  quantity          Decimal? @db.Decimal(15, 3)
+  nature            String?  @db.VarChar(100)
+  packaging         String?  @db.VarChar(100)
+  productCode       String?  @map("product_code") @db.VarChar(100)
+  transportedProduct String? @map("transported_product") @db.VarChar(300)
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt         DateTime? @map("updated_at") @db.Timestamp(6)
+
+  manifest Manifest @relation(fields: [manifestId], references: [id])
+
+  @@map("cargo")
+}
+
+model ManifestProcessing {
+  id               BigInt                @id @default(autoincrement())
+  manifestId       BigInt                @unique @map("manifest_id")
+  reviewStatus     ExtractionReviewStatus @default(PENDING) @map("review_status")
+  rawText          String?               @map("raw_text")
+  extractedJson    Json?                 @map("extracted_json")
+  overallConfidence Decimal?             @map("overall_confidence") @db.Decimal(5, 4)
+  processingError  String?               @map("processing_error")
+  reviewNotes      String?               @map("review_notes")
+  attempts         Int                   @default(0)
+  startedAt        DateTime?             @map("started_at") @db.Timestamp(6)
+  completedAt      DateTime?             @map("completed_at") @db.Timestamp(6)
+  createdAt        DateTime              @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt        DateTime?             @map("updated_at") @db.Timestamp(6)
+
+  manifest Manifest @relation(fields: [manifestId], references: [id], onDelete: Cascade)
+
+  @@index([reviewStatus])
+  @@map("manifest_processing")
+}
