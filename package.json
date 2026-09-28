@@ -14,7 +14,8 @@
     "db:validate": "prisma validate",
     "test:pdf": "tsx src/lib/manifiestos_parser/test-pdf.ts",
     "test:extraction": "tsx src/services/test-extraction.ts",
-    "test:manifest-service": "tsx src/services/test-manifest-service.ts"
+    "test:manifest-service": "tsx src/services/test-manifest-service.ts",
+    "test:processing": "tsx src/services/test-processing-service.ts"
   },
   "dependencies": {
     "@google-cloud/pubsub": "6.0.1",
