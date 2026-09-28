@@ -1,22 +1,18 @@
 export const MANIFEST_SECTION_ALIASES = {
   HEADER: [
     "MANIFIESTO ELECTRONICO DE CARGA",
-    "MANIFIESTO ELECTRÓNICO DE CARGA",
   ],
 
   MANIFEST_INFORMATION: [
     "INFORMACION DEL MANIFIESTO DE CARGA",
-    "INFORMACIÓN DEL MANIFIESTO DE CARGA",
   ],
 
   VEHICLE_AND_DRIVER: [
     "INFORMACION DEL VEHICULO Y CONDUCTOR",
-    "INFORMACIÓN DEL VEHÍCULO Y CONDUCTOR",
   ],
 
   CARGO_INFORMATION: [
     "INFORMACION DE LA MERCANCIA TRANSPORTADA",
-    "INFORMACIÓN DE LA MERCANCÍA TRANSPORTADA",
   ],
 
   PAYMENT: [
@@ -39,9 +35,17 @@ export const FIELD_ALIASES = {
   manifest: {
     manifestNumber: ["MANIFIESTO"],
     authorizationNumber: ["AUTORIZACION", "AUTORIZACIÓN"],
+    issueDate: [
+      "FECHA EXPED",
+      "FECHA DE EXPEDICION",
+      "FECHA DE EXPEDICIÓN",
+      "FECHA DE EXPEDICION (DIA/MES/AÑO)",
+      "FECHA DE EXPEDICION (DIA/MES/AÑO)",
+    ],
+    manifestType: ["TIPO MANIFIESTO"],
     origin: ["ORIGEN DEL VIAJE"],
     intermediateCity: ["CIUDAD INTERMEDIA", "CIUDAD INTEMEDIA"],
-    destination: ["DESTINO DEL VIAJE"],
+    destination: ["DESTINO DEL VIAJE", "DESTINO FINAL DEL VIAJE"],
     totalTripValue: ["VALOR TOTAL DEL VIAJE"],
     withholdingTax: ["RETENCION EN LA FUENTE", "RETENCIÓN EN LA FUENTE"],
     icaWithholding: ["RETENCION ICA", "RETENCIÓN ICA"],
@@ -54,17 +58,24 @@ export const FIELD_ALIASES = {
     unloadingPaidBy: ["DESCARGUE PAGADO POR"],
     agreedValueInWords: ["VALOR A PAGAR PACTADO EN LETRAS"],
     recommendations: ["RECOMENDACIONES"],
-    policyOwnerName: ["DUEÑO POLIZA", "DUEÑO PÓLIZA"],
+    policyOwnerName: ["DUEÑO POLIZA", "DUEÑO PÓLIZA", "DUEÑOPOLIZA", "DUEÑO POLIZA"],
   },
 
   manifestHolder: {
     fullName: ["TITULAR MANIFIESTO"],
-    identificationNumber: ["DOCTO DE IDENTIFICACION NO.", "DOCTO DE IDENTIFICACION NO"],
+    identificationNumber: [
+      "DOCTO DE IDENTIFICACION NO.",
+      "DOCTO DE IDENTIFICACION NO",
+    ],
   },
 
   driver: {
     fullName: ["CONDUCTOR"],
-    identificationNumber: ["DOCTO. DE IDENTIFICACION NO.", "DOCTO DE IDENTIFICACION NO."],
+    identificationNumber: [
+      "DOCTO. DE IDENTIFICACION NO.",
+      "DOCTO DE IDENTIFICACION NO.",
+      "DOCTO. DE IDENTIFICACION NO",
+    ],
     licenseCategory: ["CAT. LIC. CONDUCCION", "CAT. LIC. CONDUCCIÓN"],
   },
 

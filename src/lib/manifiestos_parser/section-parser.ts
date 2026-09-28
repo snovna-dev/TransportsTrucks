@@ -37,19 +37,35 @@ export function sameText(value: string, expected: string): boolean {
   return normalizeLine(value) === normalizeLine(expected);
 }
 
+const SECTION_ENTRIES = Object.entries(MANIFEST_SECTION_ALIASES) as Array<
+  [ManifestSection, readonly string[]]
+>;
+
+/**
+ * Section detection is intentionally tolerant of extra text on the same line.
+ * Some PDFs emit a heading together with adjacent table labels/values.
+ */
 export function detectSectionFromLine(line: string): ManifestSection | null {
   const normalized = normalizeLine(line);
-  const sections = Object.keys(
-    MANIFEST_SECTION_ALIASES,
-  ) as ManifestSection[];
 
-  for (const section of sections) {
-    if (
-      MANIFEST_SECTION_ALIASES[section].some(
-        (alias) => normalizeLine(alias) === normalized,
-      )
-    ) {
+  for (const [section, aliases] of SECTION_ENTRIES) {
+    if (aliases.some((alias) => normalized === normalizeLine(alias))) {
       return section;
+    }
+  }
+
+  // Avoid detecting arbitrary field labels as sections. Only a real section
+  // alias can trigger this fallback and it must be a reasonably large part of
+  // the line.
+  for (const [section, aliases] of SECTION_ENTRIES) {
+    for (const alias of aliases) {
+      const aliasNormalized = normalizeLine(alias);
+      if (!normalized.includes(aliasNormalized)) continue;
+
+      const remainingLength = normalized.length - aliasNormalized.length;
+      if (remainingLength <= 50) {
+        return section;
+      }
     }
   }
 
