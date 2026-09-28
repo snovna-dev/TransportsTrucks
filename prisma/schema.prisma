@@ -1,7 +1,6 @@
 generator client {
   provider = "prisma-client"
-  output               = "../src/generated/prisma"
-  importFileExtension  = "ts"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -13,6 +12,15 @@ enum ManifestStatus {
   PROCESSING
   REVIEW_REQUIRED
   COMPLETED
+  ERROR
+}
+
+enum ManifestJobStatus {
+  UPLOADED
+  QUEUED
+  PROCESSING
+  COMPLETED
+  REVIEW_REQUIRED
   ERROR
 }
 
@@ -176,6 +184,7 @@ model Manifest {
 
   cargo                 Cargo?
   processing            ManifestProcessing?
+  jobs                  ManifestJob[]
 
   @@index([companyId])
   @@index([issueDate])
@@ -228,4 +237,35 @@ model ManifestProcessing {
 
   @@index([reviewStatus])
   @@map("manifest_processing")
+}
+
+model ManifestJob {
+  id               BigInt            @id @default(autoincrement())
+  originalFileName String            @map("original_file_name") @db.VarChar(255)
+  fileHash         String            @unique @map("file_hash") @db.VarChar(128)
+
+  driveFileId      String?           @unique @map("drive_file_id") @db.VarChar(255)
+  driveFileUrl     String?           @map("drive_file_url") @db.VarChar(500)
+
+  // Datos extraídos antes de que exista el Manifest definitivo.
+  rawText          String?           @map("raw_text")
+  extractedJson    Json?             @map("extracted_json")
+  overallConfidence Decimal?         @map("overall_confidence") @db.Decimal(5, 4)
+
+  manifestId       BigInt?           @map("manifest_id")
+  status           ManifestJobStatus @default(UPLOADED)
+  attempts         Int               @default(0)
+  errorMessage     String?           @map("error_message")
+
+  createdAt        DateTime          @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt        DateTime?         @map("updated_at") @db.Timestamp(6)
+  startedAt        DateTime?         @map("started_at") @db.Timestamp(6)
+  completedAt      DateTime?         @map("completed_at") @db.Timestamp(6)
+
+  manifest Manifest? @relation(fields: [manifestId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([createdAt])
+  @@index([manifestId])
+  @@map("manifest_jobs")
 }

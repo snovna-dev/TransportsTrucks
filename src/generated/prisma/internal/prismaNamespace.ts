@@ -16,10 +16,10 @@
  */
 
 import * as runtime from "@prisma/client/runtime/client"
-import type * as Prisma from "../models.ts"
-import { type PrismaClient } from "./class.ts"
+import type * as Prisma from "../models.js"
+import { type PrismaClient } from "./class.js"
 
-export type * from '../models.ts'
+export type * from '../models.js'
 
 export type DMMF = typeof runtime.DMMF
 
@@ -405,7 +405,8 @@ export const ModelName = {
   PersonOrCompany: 'PersonOrCompany',
   Manifest: 'Manifest',
   Cargo: 'Cargo',
-  ManifestProcessing: 'ManifestProcessing'
+  ManifestProcessing: 'ManifestProcessing',
+  ManifestJob: 'ManifestJob'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -421,7 +422,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "company" | "driver" | "vehicleHolder" | "manifestHolder" | "vehicle" | "personOrCompany" | "manifest" | "cargo" | "manifestProcessing"
+    modelProps: "company" | "driver" | "vehicleHolder" | "manifestHolder" | "vehicle" | "personOrCompany" | "manifest" | "cargo" | "manifestProcessing" | "manifestJob"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1091,6 +1092,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ManifestJob: {
+      payload: Prisma.$ManifestJobPayload<ExtArgs>
+      fields: Prisma.ManifestJobFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ManifestJobFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ManifestJobPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ManifestJobFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ManifestJobPayload>
+        }
+        findFirst: {
+          args: Prisma.ManifestJobFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ManifestJobPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ManifestJobFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ManifestJobPayload>
+        }
+        findMany: {
+          args: Prisma.ManifestJobFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ManifestJobPayload>[]
+        }
+        create: {
+          args: Prisma.ManifestJobCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ManifestJobPayload>
+        }
+        createMany: {
+          args: Prisma.ManifestJobCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ManifestJobCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ManifestJobPayload>[]
+        }
+        delete: {
+          args: Prisma.ManifestJobDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ManifestJobPayload>
+        }
+        update: {
+          args: Prisma.ManifestJobUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ManifestJobPayload>
+        }
+        deleteMany: {
+          args: Prisma.ManifestJobDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ManifestJobUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ManifestJobUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ManifestJobPayload>[]
+        }
+        upsert: {
+          args: Prisma.ManifestJobUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ManifestJobPayload>
+        }
+        aggregate: {
+          args: Prisma.ManifestJobAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateManifestJob>
+        }
+        groupBy: {
+          args: Prisma.ManifestJobGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ManifestJobGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ManifestJobCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ManifestJobCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1295,6 +1370,28 @@ export const ManifestProcessingScalarFieldEnum = {
 export type ManifestProcessingScalarFieldEnum = (typeof ManifestProcessingScalarFieldEnum)[keyof typeof ManifestProcessingScalarFieldEnum]
 
 
+export const ManifestJobScalarFieldEnum = {
+  id: 'id',
+  originalFileName: 'originalFileName',
+  fileHash: 'fileHash',
+  driveFileId: 'driveFileId',
+  driveFileUrl: 'driveFileUrl',
+  rawText: 'rawText',
+  extractedJson: 'extractedJson',
+  overallConfidence: 'overallConfidence',
+  manifestId: 'manifestId',
+  status: 'status',
+  attempts: 'attempts',
+  errorMessage: 'errorMessage',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt'
+} as const
+
+export type ManifestJobScalarFieldEnum = (typeof ManifestJobScalarFieldEnum)[keyof typeof ManifestJobScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -1451,6 +1548,20 @@ export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'In
  * Reference to a field of type 'Int[]'
  */
 export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
+
+
+/**
+ * Reference to a field of type 'ManifestJobStatus'
+ */
+export type EnumManifestJobStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ManifestJobStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'ManifestJobStatus[]'
+ */
+export type ListEnumManifestJobStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ManifestJobStatus[]'>
     
 
 
@@ -1627,6 +1738,7 @@ export type GlobalOmitConfig = {
   manifest?: Prisma.ManifestOmit
   cargo?: Prisma.CargoOmit
   manifestProcessing?: Prisma.ManifestProcessingOmit
+  manifestJob?: Prisma.ManifestJobOmit
 }
 
 /* Types for Logging */

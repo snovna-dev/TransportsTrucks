@@ -17,8 +17,8 @@
 
 import * as runtime from "@prisma/client/runtime/index-browser"
 
-export type * from '../models.ts'
-export type * from './prismaNamespace.ts'
+export type * from '../models.js'
+export type * from './prismaNamespace.js'
 
 export const Decimal = runtime.Decimal
 
@@ -59,7 +59,8 @@ export const ModelName = {
   PersonOrCompany: 'PersonOrCompany',
   Manifest: 'Manifest',
   Cargo: 'Cargo',
-  ManifestProcessing: 'ManifestProcessing'
+  ManifestProcessing: 'ManifestProcessing',
+  ManifestJob: 'ManifestJob'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -241,6 +242,28 @@ export const ManifestProcessingScalarFieldEnum = {
 } as const
 
 export type ManifestProcessingScalarFieldEnum = (typeof ManifestProcessingScalarFieldEnum)[keyof typeof ManifestProcessingScalarFieldEnum]
+
+
+export const ManifestJobScalarFieldEnum = {
+  id: 'id',
+  originalFileName: 'originalFileName',
+  fileHash: 'fileHash',
+  driveFileId: 'driveFileId',
+  driveFileUrl: 'driveFileUrl',
+  rawText: 'rawText',
+  extractedJson: 'extractedJson',
+  overallConfidence: 'overallConfidence',
+  manifestId: 'manifestId',
+  status: 'status',
+  attempts: 'attempts',
+  errorMessage: 'errorMessage',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt'
+} as const
+
+export type ManifestJobScalarFieldEnum = (typeof ManifestJobScalarFieldEnum)[keyof typeof ManifestJobScalarFieldEnum]
 
 
 export const SortOrder = {

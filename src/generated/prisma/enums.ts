@@ -20,6 +20,18 @@ export const ManifestStatus = {
 export type ManifestStatus = (typeof ManifestStatus)[keyof typeof ManifestStatus]
 
 
+export const ManifestJobStatus = {
+  UPLOADED: 'UPLOADED',
+  QUEUED: 'QUEUED',
+  PROCESSING: 'PROCESSING',
+  COMPLETED: 'COMPLETED',
+  REVIEW_REQUIRED: 'REVIEW_REQUIRED',
+  ERROR: 'ERROR'
+} as const
+
+export type ManifestJobStatus = (typeof ManifestJobStatus)[keyof typeof ManifestJobStatus]
+
+
 export const ExtractionReviewStatus = {
   PENDING: 'PENDING',
   IN_REVIEW: 'IN_REVIEW',

@@ -16,7 +16,9 @@
     "test:extraction": "tsx src/services/test-extraction.ts",
     "test:manifest-service": "tsx src/services/test-manifest-service.ts",
     "test:processing": "tsx src/services/test-processing-service.ts",
-    "test:parser:variants": "tsx src/lib/manifiestos_parser/test-parser-variants.ts"
+    "test:parser:variants": "tsx src/lib/manifiestos_parser/test-parser-variants.ts",
+    "db:push": "prisma db push",
+    "test:manifest-job": "tsx src/services/test-manifest-job.ts"
   },
   "dependencies": {
     "@google-cloud/pubsub": "6.0.1",
