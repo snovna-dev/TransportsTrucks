@@ -12,7 +12,8 @@
     "db:deploy": "prisma migrate deploy",
     "db:studio": "prisma studio",
     "db:validate": "prisma validate",
-    "test:pdf": "tsx src/lib/manifiestos_parser/test-pdf.ts"
+    "test:pdf": "tsx src/lib/manifiestos_parser/test-pdf.ts",
+    "test:extraction": "tsx src/services/test-extraction.ts"
   },
   "dependencies": {
     "@google-cloud/pubsub": "6.0.1",
