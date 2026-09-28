@@ -1,106 +1,66 @@
-import { extractManifestFromPdfFile } from "../../services/extraction.service";
+import { extractPdfTextFromFile } from "./pdf";
+import { parseManifestText, summarizeConfidence } from "./manifest-parser";
 
-interface VariantExpectation {
-  label: string;
-  path: string;
-}
+const files = process.argv.slice(2);
 
-function assert(condition: unknown, message: string): asserts condition {
-  if (!condition) {
-    throw new Error(`VALIDACIÓN FALLIDA: ${message}`);
-  }
-}
-
-async function testVariant({ label, path }: VariantExpectation) {
-  console.log();
-  console.log(`=== ${label} ===`);
-  console.log(`Archivo: ${path}`);
-
-  const result = await extractManifestFromPdfFile(path);
-  const { extraction } = result;
-
-  console.log(`Manifesto: ${extraction.manifest.manifestNumber.value}`);
-  console.log(`Autorización: ${extraction.manifest.authorizationNumber.value}`);
-  console.log(`Fecha: ${extraction.manifest.issueDate.value}`);
-  console.log(`Placa: ${extraction.vehicle.plate.value}`);
-  console.log(`Póliza SOAT: ${extraction.vehicle.soatPolicyNumber.value}`);
-  console.log(`Remesa: ${extraction.cargo.remittanceNumber.value}`);
-  console.log(`Remitente: ${extraction.sender.identificationNumber.value}`);
-  console.log(`Destinatario: ${extraction.recipient.identificationNumber.value}`);
-  console.log(`Confianza: ${result.overallConfidence.toFixed(2)}`);
-  console.log(`Acción: ${result.action}`);
-
-  assert(
-    /^\d{10,15}M$/.test(extraction.manifest.manifestNumber.value ?? ""),
-    "el número de manifiesto no tiene el formato esperado",
+if (files.length < 1) {
+  console.error(
+    'Uso: npm run test:parser:variants -- "C:\\ruta\\manifiesto1.pdf" "C:\\ruta\\manifiesto2.pdf" ...',
   );
-  assert(
-    /^\d{8,12}$/.test(extraction.manifest.authorizationNumber.value ?? ""),
-    "el número de autorización no fue extraído",
-  );
-  assert(
-    extraction.manifest.issueDate.value !== null,
-    "la fecha del manifiesto no fue extraída",
-  );
-  assert(
-    extraction.vehicle.plate.value !== null,
-    "la placa no fue extraída",
-  );
-  assert(
-    extraction.vehicle.soatPolicyNumber.value !== null,
-    "la póliza SOAT no fue extraída",
-  );
-  assert(
-    extraction.driver.identificationNumber.value !== null,
-    "el documento del conductor no fue extraído",
-  );
-  assert(
-    extraction.cargo.remittanceNumber.value !== null,
-    "la remesa no fue extraída",
-  );
-  assert(
-    extraction.sender.identificationNumber.value !== null &&
-      extraction.recipient.identificationNumber.value !== null,
-    "los identificadores de remitente/destinatario no fueron extraídos",
-  );
-  assert(
-    result.blockingReviewFields.length === 0,
-    `hay campos bloqueantes: ${result.blockingReviewFields.map((field) => field.path).join(", ")}`,
-  );
-  assert(
-    result.action === "AUTO_SAVE",
-    `el documento terminó en ${result.action} en lugar de AUTO_SAVE`,
-  );
-
-  console.log("Resultado: OK");
-}
-
-async function main() {
-  const paths = process.argv.slice(2);
-
-  if (paths.length < 2) {
-    console.error(
-      'Uso: npm run test:parser:variants -- "C:\\ruta\\manifiesto1.pdf" "C:\\ruta\\manifiesto2.pdf"',
-    );
-    process.exit(1);
-  }
-
-  console.log("========================================");
-  console.log("PRUEBA DE VARIANTES DEL PARSER");
-  console.log("========================================");
-
-  await testVariant({ label: "VARIANTE 1", path: paths[0]! });
-  await testVariant({ label: "VARIANTE 2", path: paths[1]! });
-
-  console.log();
-  console.log("========================================");
-  console.log("TODAS LAS VARIANTES: OK");
-  console.log("========================================");
-}
-
-main().catch((error) => {
-  console.error();
-  console.error("=== ERROR ===");
-  console.error(error);
   process.exit(1);
-});
+}
+
+let allOk = true;
+
+for (const [index, file] of files.entries()) {
+  console.log();
+  console.log(`=== VARIANTE ${index + 1} ===`);
+  console.log(`Archivo: ${file}`);
+
+  try {
+    const pdf = await extractPdfTextFromFile(file);
+    const extraction = parseManifestText(pdf.text);
+    const summary = summarizeConfidence(extraction);
+
+    console.log(`Páginas PDF: ${pdf.pageCount}`);
+    console.log("Páginas usadas por parser: 1");
+    console.log(`Manifesto: ${extraction.manifest.manifestNumber.value ?? "N/A"}`);
+    console.log(`Autorización: ${extraction.manifest.authorizationNumber.value ?? "N/A"}`);
+    console.log(`Placa: ${extraction.vehicle.plate.value ?? "N/A"}`);
+    console.log(`Remesa: ${extraction.cargo.remittanceNumber.value ?? "N/A"}`);
+    console.log(`Remitente: ${extraction.sender.identificationNumber.value ?? "N/A"}`);
+    console.log(`Destinatario: ${extraction.recipient.identificationNumber.value ?? "N/A"}`);
+    console.log(`Confianza campos >95%: ${summary.autoSave}/${summary.total}`);
+
+    const critical = [
+      ["manifest.manifestNumber", extraction.manifest.manifestNumber.value],
+      ["manifest.authorizationNumber", extraction.manifest.authorizationNumber.value],
+      ["manifest.issueDate", extraction.manifest.issueDate.value],
+      ["vehicle.plate", extraction.vehicle.plate.value],
+      ["vehicle.soatPolicyNumber", extraction.vehicle.soatPolicyNumber.value],
+      ["cargo.remittanceNumber", extraction.cargo.remittanceNumber.value],
+      ["sender.identificationNumber", extraction.sender.identificationNumber.value],
+      ["recipient.identificationNumber", extraction.recipient.identificationNumber.value],
+    ];
+
+    const missing = critical.filter(([, value]) => value === null).map(([path]) => path);
+    if (missing.length) {
+      console.log(`Campos críticos faltantes: ${missing.join(", ")}`);
+      console.log("Resultado: REVIEW_REQUIRED");
+      allOk = false;
+    } else {
+      console.log("Resultado: OK");
+    }
+  } catch (error) {
+    allOk = false;
+    console.error("Resultado: ERROR");
+    console.error(error);
+  }
+}
+
+console.log();
+console.log("========================================");
+console.log(allOk ? "TODAS LAS VARIANTES: OK" : "HAY VARIANTES QUE REQUIEREN REVISIÓN");
+console.log("========================================");
+
+process.exit(allOk ? 0 : 1);

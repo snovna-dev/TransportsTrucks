@@ -10,6 +10,7 @@ import {
   splitLayoutColumns,
   type ParsedLine,
 } from "./section-parser";
+import { isPacarVariant, parsePacar } from "./pacar-variant-parser";
 
 const SOURCE = "PDF_TEXT" as const;
 
@@ -1021,6 +1022,13 @@ function parseRecommendations(): ExtractedField<string> {
 function buildExtraction(text: string): ManifestExtraction {
   const parsed = parseSections(text);
   const lines = parsed.lines;
+
+  // Variante Transportes Pacar: su primera página usa una distribución
+  // diferente de columnas y nombres de encabezados. Se procesa con un
+  // parser específico de layout, sin afectar las variantes anteriores.
+  if (isPacarVariant(lines)) {
+    return ManifestExtractionSchema.parse(parsePacar(lines));
+  }
 
   const company = parseCompany(lines);
   const manifestInfo = parseManifestInformation(lines);

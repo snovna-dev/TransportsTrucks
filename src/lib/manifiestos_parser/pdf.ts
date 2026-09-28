@@ -115,7 +115,10 @@ export async function extractPdfText(
   try {
     const data = new Uint8Array(input);
     const result = await extractTextItems(data);
-    const layoutText = buildDocumentLayout(result.items);
+    // El manifiesto de negocio se procesa únicamente con la página 1.
+    // pageCount conserva el total real del PDF para trazabilidad.
+    const firstPageItems = result.items.slice(0, 1);
+    const layoutText = buildDocumentLayout(firstPageItems);
 
     if (!layoutText) {
       throw new PdfExtractionError(
