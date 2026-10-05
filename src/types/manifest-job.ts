@@ -9,4 +9,6 @@ export interface CreateManifestJobResult {
   id: bigint;
   created: boolean;
   status: ManifestJobStatus;
+  driveFileId: string | null;
+  driveFileUrl: string | null;
 }

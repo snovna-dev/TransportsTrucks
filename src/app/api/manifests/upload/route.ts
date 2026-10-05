@@ -73,15 +73,26 @@ export async function POST(request: Request) {
     }
 
     try {
-      const driveFile = await uploadPdfToDrive({
-        fileName: file.name,
-        buffer,
-      });
+      // Si el job ya tenía un archivo en Drive (por ejemplo, falló Pub/Sub),
+      // lo reutilizamos y evitamos crear una segunda copia.
+      let driveFile = job.driveFileId
+        ? {
+            id: job.driveFileId,
+            webViewLink: job.driveFileUrl,
+          }
+        : null;
 
-      await updateManifestJobStorage(job.id, {
-        driveFileId: driveFile.id,
-        driveFileUrl: driveFile.webViewLink,
-      });
+      if (!driveFile) {
+        driveFile = await uploadPdfToDrive({
+          fileName: file.name,
+          buffer,
+        });
+
+        await updateManifestJobStorage(job.id, {
+          driveFileId: driveFile.id,
+          driveFileUrl: driveFile.webViewLink,
+        });
+      }
 
       await markManifestJobQueued(job.id);
       const messageId = await publishManifestJob(job.id);
