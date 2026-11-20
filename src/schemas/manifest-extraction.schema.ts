@@ -14,7 +14,7 @@ export const ManifestSectionSchema = z.enum([
   "RECOMMENDATIONS",
 ]);
 
-export const ConfidenceSourceSchema = z.literal("PDF_TEXT");
+export const ConfidenceSourceSchema = z.enum(["PDF_TEXT", "USER"]);
 export const confidenceSchema = z.number().min(0).max(1);
 
 export const extractedFieldSchema = <T extends z.ZodTypeAny>(valueSchema: T) =>

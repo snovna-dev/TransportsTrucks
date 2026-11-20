@@ -808,9 +808,9 @@ function parseCargoAndParties(lines: ParsedLine[]) {
     ? uniqueParties.filter((party) => party.lineIndex === partyCodeLineIndex)
     : [];
 
-  let sender = partiesOnProductLine[0] ?? null;
+  let sender: (typeof uniqueParties)[number] | null = partiesOnProductLine[0] ?? null;
   const remaining = uniqueParties.filter((party) => party.id !== sender?.id);
-  let recipient = remaining[0] ?? null;
+  let recipient: (typeof uniqueParties)[number] | null = remaining[0] ?? null;
 
   // When both party IDs are printed on the same data row, preserve visual
   // left-to-right order. When extraction splits them across lines, the party
@@ -1058,9 +1058,9 @@ function buildExtraction(text: string): ManifestExtraction {
     driver: people.driver,
     vehicleHolder: people.vehicleHolder,
     vehicle: people.vehicle,
-    cargoOwner: cargoAndParties.cargoOwner,
-    sender: cargoAndParties.sender,
-    recipient: cargoAndParties.recipient,
+    cargoOwner: cargoAndParties.cargoOwner as ManifestExtraction["cargoOwner"],
+    sender: cargoAndParties.sender as ManifestExtraction["sender"],
+    recipient: cargoAndParties.recipient as ManifestExtraction["recipient"],
     cargo: cargoAndParties.cargo,
   };
 

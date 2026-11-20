@@ -1,6 +1,8 @@
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
+  // Sin extensión en los imports generados para que Next.js (Turbopack) y tsx los resuelvan.
+  importFileExtension = ""
 }
 
 datasource db {
@@ -131,7 +133,8 @@ model Manifest {
   id                    BigInt   @id @default(autoincrement())
   companyId             BigInt   @map("company_id")
   manifestNumber        String   @unique @map("manifest_number") @db.VarChar(50)
-  authorizationNumber   String   @unique @map("authorization_number") @db.VarChar(50)
+  // Algunas variantes del PDF no traen la autorización: se permite nulo.
+  authorizationNumber   String?  @unique @map("authorization_number") @db.VarChar(50)
   issueDate             DateTime @map("issue_date") @db.Date
   manifestType          String?  @map("manifest_type") @db.VarChar(100)
   origin                String?  @db.VarChar(150)
@@ -185,6 +188,7 @@ model Manifest {
   cargo                 Cargo?
   processing            ManifestProcessing?
   jobs                  ManifestJob[]
+  corrections           ManifestFieldCorrection[]
 
   @@index([companyId])
   @@index([issueDate])
@@ -247,6 +251,13 @@ model ManifestJob {
   driveFileId      String?           @unique @map("drive_file_id") @db.VarChar(255)
   driveFileUrl     String?           @map("drive_file_url") @db.VarChar(500)
 
+  // Almacenamiento intercambiable del PDF original: "db", "local" o "drive".
+  storageProvider  String?           @map("storage_provider") @db.VarChar(20)
+  storageKey       String?           @map("storage_key") @db.VarChar(500)
+  fileSize         Int?              @map("file_size")
+  // Solo se usa cuando storageProvider = "db". Nunca seleccionarlo en listados.
+  pdfData          Bytes?            @map("pdf_data")
+
   // Datos extraídos antes de que exista el Manifest definitivo.
   rawText          String?           @map("raw_text")
   extractedJson    Json?             @map("extracted_json")
@@ -261,11 +272,34 @@ model ManifestJob {
   updatedAt        DateTime?         @map("updated_at") @db.Timestamp(6)
   startedAt        DateTime?         @map("started_at") @db.Timestamp(6)
   completedAt      DateTime?         @map("completed_at") @db.Timestamp(6)
+  reviewedAt       DateTime?         @map("reviewed_at") @db.Timestamp(6)
 
-  manifest Manifest? @relation(fields: [manifestId], references: [id], onDelete: SetNull)
+  manifest    Manifest? @relation(fields: [manifestId], references: [id], onDelete: SetNull)
+  corrections ManifestFieldCorrection[]
 
   @@index([status])
   @@index([createdAt])
   @@index([manifestId])
   @@map("manifest_jobs")
+}
+
+// Auditoría de la revisión manual: un registro por campo corregido.
+// No hay login, así que la fuente siempre es USER.
+model ManifestFieldCorrection {
+  id                 BigInt   @id @default(autoincrement())
+  jobId              BigInt   @map("job_id")
+  manifestId         BigInt?  @map("manifest_id")
+  fieldPath          String   @map("field_path") @db.VarChar(100)
+  originalValue      Json?    @map("original_value")
+  correctedValue     Json?    @map("corrected_value")
+  originalConfidence Decimal? @map("original_confidence") @db.Decimal(5, 4)
+  source             String   @default("USER") @db.VarChar(20)
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+
+  job      ManifestJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  manifest Manifest?   @relation(fields: [manifestId], references: [id], onDelete: SetNull)
+
+  @@index([jobId])
+  @@index([manifestId])
+  @@map("manifest_field_corrections")
 }

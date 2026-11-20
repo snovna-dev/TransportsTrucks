@@ -9,8 +9,8 @@
  * 🟢 You can import this file directly.
  */
 import type * as runtime from "@prisma/client/runtime/client"
-import type * as $Enums from "../enums.js"
-import type * as Prisma from "../internal/prismaNamespace.js"
+import type * as $Enums from "../enums"
+import type * as Prisma from "../internal/prismaNamespace"
 
 /**
  * Model Manifest
@@ -419,7 +419,7 @@ export type ManifestGroupByOutputType = {
   id: bigint
   companyId: bigint
   manifestNumber: string
-  authorizationNumber: string
+  authorizationNumber: string | null
   issueDate: Date
   manifestType: string | null
   origin: string | null
@@ -480,7 +480,7 @@ export type ManifestWhereInput = {
   id?: Prisma.BigIntFilter<"Manifest"> | bigint | number
   companyId?: Prisma.BigIntFilter<"Manifest"> | bigint | number
   manifestNumber?: Prisma.StringFilter<"Manifest"> | string
-  authorizationNumber?: Prisma.StringFilter<"Manifest"> | string
+  authorizationNumber?: Prisma.StringNullableFilter<"Manifest"> | string | null
   issueDate?: Prisma.DateTimeFilter<"Manifest"> | Date | string
   manifestType?: Prisma.StringNullableFilter<"Manifest"> | string | null
   origin?: Prisma.StringNullableFilter<"Manifest"> | string | null
@@ -523,13 +523,14 @@ export type ManifestWhereInput = {
   cargo?: Prisma.XOR<Prisma.CargoNullableScalarRelationFilter, Prisma.CargoWhereInput> | null
   processing?: Prisma.XOR<Prisma.ManifestProcessingNullableScalarRelationFilter, Prisma.ManifestProcessingWhereInput> | null
   jobs?: Prisma.ManifestJobListRelationFilter
+  corrections?: Prisma.ManifestFieldCorrectionListRelationFilter
 }
 
 export type ManifestOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   companyId?: Prisma.SortOrder
   manifestNumber?: Prisma.SortOrder
-  authorizationNumber?: Prisma.SortOrder
+  authorizationNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   issueDate?: Prisma.SortOrder
   manifestType?: Prisma.SortOrderInput | Prisma.SortOrder
   origin?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -572,6 +573,7 @@ export type ManifestOrderByWithRelationInput = {
   cargo?: Prisma.CargoOrderByWithRelationInput
   processing?: Prisma.ManifestProcessingOrderByWithRelationInput
   jobs?: Prisma.ManifestJobOrderByRelationAggregateInput
+  corrections?: Prisma.ManifestFieldCorrectionOrderByRelationAggregateInput
 }
 
 export type ManifestWhereUniqueInput = Prisma.AtLeast<{
@@ -624,13 +626,14 @@ export type ManifestWhereUniqueInput = Prisma.AtLeast<{
   cargo?: Prisma.XOR<Prisma.CargoNullableScalarRelationFilter, Prisma.CargoWhereInput> | null
   processing?: Prisma.XOR<Prisma.ManifestProcessingNullableScalarRelationFilter, Prisma.ManifestProcessingWhereInput> | null
   jobs?: Prisma.ManifestJobListRelationFilter
+  corrections?: Prisma.ManifestFieldCorrectionListRelationFilter
 }, "id" | "manifestNumber" | "authorizationNumber">
 
 export type ManifestOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   companyId?: Prisma.SortOrder
   manifestNumber?: Prisma.SortOrder
-  authorizationNumber?: Prisma.SortOrder
+  authorizationNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   issueDate?: Prisma.SortOrder
   manifestType?: Prisma.SortOrderInput | Prisma.SortOrder
   origin?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -676,7 +679,7 @@ export type ManifestScalarWhereWithAggregatesInput = {
   id?: Prisma.BigIntWithAggregatesFilter<"Manifest"> | bigint | number
   companyId?: Prisma.BigIntWithAggregatesFilter<"Manifest"> | bigint | number
   manifestNumber?: Prisma.StringWithAggregatesFilter<"Manifest"> | string
-  authorizationNumber?: Prisma.StringWithAggregatesFilter<"Manifest"> | string
+  authorizationNumber?: Prisma.StringNullableWithAggregatesFilter<"Manifest"> | string | null
   issueDate?: Prisma.DateTimeWithAggregatesFilter<"Manifest"> | Date | string
   manifestType?: Prisma.StringNullableWithAggregatesFilter<"Manifest"> | string | null
   origin?: Prisma.StringNullableWithAggregatesFilter<"Manifest"> | string | null
@@ -713,7 +716,7 @@ export type ManifestScalarWhereWithAggregatesInput = {
 export type ManifestCreateInput = {
   id?: bigint | number
   manifestNumber: string
-  authorizationNumber: string
+  authorizationNumber?: string | null
   issueDate: Date | string
   manifestType?: string | null
   origin?: string | null
@@ -749,13 +752,14 @@ export type ManifestCreateInput = {
   cargo?: Prisma.CargoCreateNestedOneWithoutManifestInput
   processing?: Prisma.ManifestProcessingCreateNestedOneWithoutManifestInput
   jobs?: Prisma.ManifestJobCreateNestedManyWithoutManifestInput
+  corrections?: Prisma.ManifestFieldCorrectionCreateNestedManyWithoutManifestInput
 }
 
 export type ManifestUncheckedCreateInput = {
   id?: bigint | number
   companyId: bigint | number
   manifestNumber: string
-  authorizationNumber: string
+  authorizationNumber?: string | null
   issueDate: Date | string
   manifestType?: string | null
   origin?: string | null
@@ -790,12 +794,13 @@ export type ManifestUncheckedCreateInput = {
   cargo?: Prisma.CargoUncheckedCreateNestedOneWithoutManifestInput
   processing?: Prisma.ManifestProcessingUncheckedCreateNestedOneWithoutManifestInput
   jobs?: Prisma.ManifestJobUncheckedCreateNestedManyWithoutManifestInput
+  corrections?: Prisma.ManifestFieldCorrectionUncheckedCreateNestedManyWithoutManifestInput
 }
 
 export type ManifestUpdateInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   manifestNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  authorizationNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  authorizationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manifestType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   origin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -831,13 +836,14 @@ export type ManifestUpdateInput = {
   cargo?: Prisma.CargoUpdateOneWithoutManifestNestedInput
   processing?: Prisma.ManifestProcessingUpdateOneWithoutManifestNestedInput
   jobs?: Prisma.ManifestJobUpdateManyWithoutManifestNestedInput
+  corrections?: Prisma.ManifestFieldCorrectionUpdateManyWithoutManifestNestedInput
 }
 
 export type ManifestUncheckedUpdateInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   companyId?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   manifestNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  authorizationNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  authorizationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manifestType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   origin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -872,13 +878,14 @@ export type ManifestUncheckedUpdateInput = {
   cargo?: Prisma.CargoUncheckedUpdateOneWithoutManifestNestedInput
   processing?: Prisma.ManifestProcessingUncheckedUpdateOneWithoutManifestNestedInput
   jobs?: Prisma.ManifestJobUncheckedUpdateManyWithoutManifestNestedInput
+  corrections?: Prisma.ManifestFieldCorrectionUncheckedUpdateManyWithoutManifestNestedInput
 }
 
 export type ManifestCreateManyInput = {
   id?: bigint | number
   companyId: bigint | number
   manifestNumber: string
-  authorizationNumber: string
+  authorizationNumber?: string | null
   issueDate: Date | string
   manifestType?: string | null
   origin?: string | null
@@ -915,7 +922,7 @@ export type ManifestCreateManyInput = {
 export type ManifestUpdateManyMutationInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   manifestNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  authorizationNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  authorizationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manifestType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   origin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -946,7 +953,7 @@ export type ManifestUncheckedUpdateManyInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   companyId?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   manifestNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  authorizationNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  authorizationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manifestType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   origin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1542,10 +1549,26 @@ export type ManifestUpdateOneWithoutJobsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ManifestUpdateToOneWithWhereWithoutJobsInput, Prisma.ManifestUpdateWithoutJobsInput>, Prisma.ManifestUncheckedUpdateWithoutJobsInput>
 }
 
+export type ManifestCreateNestedOneWithoutCorrectionsInput = {
+  create?: Prisma.XOR<Prisma.ManifestCreateWithoutCorrectionsInput, Prisma.ManifestUncheckedCreateWithoutCorrectionsInput>
+  connectOrCreate?: Prisma.ManifestCreateOrConnectWithoutCorrectionsInput
+  connect?: Prisma.ManifestWhereUniqueInput
+}
+
+export type ManifestUpdateOneWithoutCorrectionsNestedInput = {
+  create?: Prisma.XOR<Prisma.ManifestCreateWithoutCorrectionsInput, Prisma.ManifestUncheckedCreateWithoutCorrectionsInput>
+  connectOrCreate?: Prisma.ManifestCreateOrConnectWithoutCorrectionsInput
+  upsert?: Prisma.ManifestUpsertWithoutCorrectionsInput
+  disconnect?: Prisma.ManifestWhereInput | boolean
+  delete?: Prisma.ManifestWhereInput | boolean
+  connect?: Prisma.ManifestWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ManifestUpdateToOneWithWhereWithoutCorrectionsInput, Prisma.ManifestUpdateWithoutCorrectionsInput>, Prisma.ManifestUncheckedUpdateWithoutCorrectionsInput>
+}
+
 export type ManifestCreateWithoutCompanyInput = {
   id?: bigint | number
   manifestNumber: string
-  authorizationNumber: string
+  authorizationNumber?: string | null
   issueDate: Date | string
   manifestType?: string | null
   origin?: string | null
@@ -1580,12 +1603,13 @@ export type ManifestCreateWithoutCompanyInput = {
   cargo?: Prisma.CargoCreateNestedOneWithoutManifestInput
   processing?: Prisma.ManifestProcessingCreateNestedOneWithoutManifestInput
   jobs?: Prisma.ManifestJobCreateNestedManyWithoutManifestInput
+  corrections?: Prisma.ManifestFieldCorrectionCreateNestedManyWithoutManifestInput
 }
 
 export type ManifestUncheckedCreateWithoutCompanyInput = {
   id?: bigint | number
   manifestNumber: string
-  authorizationNumber: string
+  authorizationNumber?: string | null
   issueDate: Date | string
   manifestType?: string | null
   origin?: string | null
@@ -1620,6 +1644,7 @@ export type ManifestUncheckedCreateWithoutCompanyInput = {
   cargo?: Prisma.CargoUncheckedCreateNestedOneWithoutManifestInput
   processing?: Prisma.ManifestProcessingUncheckedCreateNestedOneWithoutManifestInput
   jobs?: Prisma.ManifestJobUncheckedCreateNestedManyWithoutManifestInput
+  corrections?: Prisma.ManifestFieldCorrectionUncheckedCreateNestedManyWithoutManifestInput
 }
 
 export type ManifestCreateOrConnectWithoutCompanyInput = {
@@ -1655,7 +1680,7 @@ export type ManifestScalarWhereInput = {
   id?: Prisma.BigIntFilter<"Manifest"> | bigint | number
   companyId?: Prisma.BigIntFilter<"Manifest"> | bigint | number
   manifestNumber?: Prisma.StringFilter<"Manifest"> | string
-  authorizationNumber?: Prisma.StringFilter<"Manifest"> | string
+  authorizationNumber?: Prisma.StringNullableFilter<"Manifest"> | string | null
   issueDate?: Prisma.DateTimeFilter<"Manifest"> | Date | string
   manifestType?: Prisma.StringNullableFilter<"Manifest"> | string | null
   origin?: Prisma.StringNullableFilter<"Manifest"> | string | null
@@ -1692,7 +1717,7 @@ export type ManifestScalarWhereInput = {
 export type ManifestCreateWithoutDriverInput = {
   id?: bigint | number
   manifestNumber: string
-  authorizationNumber: string
+  authorizationNumber?: string | null
   issueDate: Date | string
   manifestType?: string | null
   origin?: string | null
@@ -1727,13 +1752,14 @@ export type ManifestCreateWithoutDriverInput = {
   cargo?: Prisma.CargoCreateNestedOneWithoutManifestInput
   processing?: Prisma.ManifestProcessingCreateNestedOneWithoutManifestInput
   jobs?: Prisma.ManifestJobCreateNestedManyWithoutManifestInput
+  corrections?: Prisma.ManifestFieldCorrectionCreateNestedManyWithoutManifestInput
 }
 
 export type ManifestUncheckedCreateWithoutDriverInput = {
   id?: bigint | number
   companyId: bigint | number
   manifestNumber: string
-  authorizationNumber: string
+  authorizationNumber?: string | null
   issueDate: Date | string
   manifestType?: string | null
   origin?: string | null
@@ -1767,6 +1793,7 @@ export type ManifestUncheckedCreateWithoutDriverInput = {
   cargo?: Prisma.CargoUncheckedCreateNestedOneWithoutManifestInput
   processing?: Prisma.ManifestProcessingUncheckedCreateNestedOneWithoutManifestInput
   jobs?: Prisma.ManifestJobUncheckedCreateNestedManyWithoutManifestInput
+  corrections?: Prisma.ManifestFieldCorrectionUncheckedCreateNestedManyWithoutManifestInput
 }
 
 export type ManifestCreateOrConnectWithoutDriverInput = {
@@ -1798,7 +1825,7 @@ export type ManifestUpdateManyWithWhereWithoutDriverInput = {
 export type ManifestCreateWithoutVehicleHolderInput = {
   id?: bigint | number
   manifestNumber: string
-  authorizationNumber: string
+  authorizationNumber?: string | null
   issueDate: Date | string
   manifestType?: string | null
   origin?: string | null
@@ -1833,13 +1860,14 @@ export type ManifestCreateWithoutVehicleHolderInput = {
   cargo?: Prisma.CargoCreateNestedOneWithoutManifestInput
   processing?: Prisma.ManifestProcessingCreateNestedOneWithoutManifestInput
   jobs?: Prisma.ManifestJobCreateNestedManyWithoutManifestInput
+  corrections?: Prisma.ManifestFieldCorrectionCreateNestedManyWithoutManifestInput
 }
 
 export type ManifestUncheckedCreateWithoutVehicleHolderInput = {
   id?: bigint | number
   companyId: bigint | number
   manifestNumber: string
-  authorizationNumber: string
+  authorizationNumber?: string | null
   issueDate: Date | string
   manifestType?: string | null
   origin?: string | null
@@ -1873,6 +1901,7 @@ export type ManifestUncheckedCreateWithoutVehicleHolderInput = {
   cargo?: Prisma.CargoUncheckedCreateNestedOneWithoutManifestInput
   processing?: Prisma.ManifestProcessingUncheckedCreateNestedOneWithoutManifestInput
   jobs?: Prisma.ManifestJobUncheckedCreateNestedManyWithoutManifestInput
+  corrections?: Prisma.ManifestFieldCorrectionUncheckedCreateNestedManyWithoutManifestInput
 }
 
 export type ManifestCreateOrConnectWithoutVehicleHolderInput = {
@@ -1904,7 +1933,7 @@ export type ManifestUpdateManyWithWhereWithoutVehicleHolderInput = {
 export type ManifestCreateWithoutManifestHolderInput = {
   id?: bigint | number
   manifestNumber: string
-  authorizationNumber: string
+  authorizationNumber?: string | null
   issueDate: Date | string
   manifestType?: string | null
   origin?: string | null
@@ -1939,13 +1968,14 @@ export type ManifestCreateWithoutManifestHolderInput = {
   cargo?: Prisma.CargoCreateNestedOneWithoutManifestInput
   processing?: Prisma.ManifestProcessingCreateNestedOneWithoutManifestInput
   jobs?: Prisma.ManifestJobCreateNestedManyWithoutManifestInput
+  corrections?: Prisma.ManifestFieldCorrectionCreateNestedManyWithoutManifestInput
 }
 
 export type ManifestUncheckedCreateWithoutManifestHolderInput = {
   id?: bigint | number
   companyId: bigint | number
   manifestNumber: string
-  authorizationNumber: string
+  authorizationNumber?: string | null
   issueDate: Date | string
   manifestType?: string | null
   origin?: string | null
@@ -1979,6 +2009,7 @@ export type ManifestUncheckedCreateWithoutManifestHolderInput = {
   cargo?: Prisma.CargoUncheckedCreateNestedOneWithoutManifestInput
   processing?: Prisma.ManifestProcessingUncheckedCreateNestedOneWithoutManifestInput
   jobs?: Prisma.ManifestJobUncheckedCreateNestedManyWithoutManifestInput
+  corrections?: Prisma.ManifestFieldCorrectionUncheckedCreateNestedManyWithoutManifestInput
 }
 
 export type ManifestCreateOrConnectWithoutManifestHolderInput = {
@@ -2010,7 +2041,7 @@ export type ManifestUpdateManyWithWhereWithoutManifestHolderInput = {
 export type ManifestCreateWithoutVehicleInput = {
   id?: bigint | number
   manifestNumber: string
-  authorizationNumber: string
+  authorizationNumber?: string | null
   issueDate: Date | string
   manifestType?: string | null
   origin?: string | null
@@ -2045,13 +2076,14 @@ export type ManifestCreateWithoutVehicleInput = {
   cargo?: Prisma.CargoCreateNestedOneWithoutManifestInput
   processing?: Prisma.ManifestProcessingCreateNestedOneWithoutManifestInput
   jobs?: Prisma.ManifestJobCreateNestedManyWithoutManifestInput
+  corrections?: Prisma.ManifestFieldCorrectionCreateNestedManyWithoutManifestInput
 }
 
 export type ManifestUncheckedCreateWithoutVehicleInput = {
   id?: bigint | number
   companyId: bigint | number
   manifestNumber: string
-  authorizationNumber: string
+  authorizationNumber?: string | null
   issueDate: Date | string
   manifestType?: string | null
   origin?: string | null
@@ -2085,6 +2117,7 @@ export type ManifestUncheckedCreateWithoutVehicleInput = {
   cargo?: Prisma.CargoUncheckedCreateNestedOneWithoutManifestInput
   processing?: Prisma.ManifestProcessingUncheckedCreateNestedOneWithoutManifestInput
   jobs?: Prisma.ManifestJobUncheckedCreateNestedManyWithoutManifestInput
+  corrections?: Prisma.ManifestFieldCorrectionUncheckedCreateNestedManyWithoutManifestInput
 }
 
 export type ManifestCreateOrConnectWithoutVehicleInput = {
@@ -2116,7 +2149,7 @@ export type ManifestUpdateManyWithWhereWithoutVehicleInput = {
 export type ManifestCreateWithoutCargoOwnerInput = {
   id?: bigint | number
   manifestNumber: string
-  authorizationNumber: string
+  authorizationNumber?: string | null
   issueDate: Date | string
   manifestType?: string | null
   origin?: string | null
@@ -2151,13 +2184,14 @@ export type ManifestCreateWithoutCargoOwnerInput = {
   cargo?: Prisma.CargoCreateNestedOneWithoutManifestInput
   processing?: Prisma.ManifestProcessingCreateNestedOneWithoutManifestInput
   jobs?: Prisma.ManifestJobCreateNestedManyWithoutManifestInput
+  corrections?: Prisma.ManifestFieldCorrectionCreateNestedManyWithoutManifestInput
 }
 
 export type ManifestUncheckedCreateWithoutCargoOwnerInput = {
   id?: bigint | number
   companyId: bigint | number
   manifestNumber: string
-  authorizationNumber: string
+  authorizationNumber?: string | null
   issueDate: Date | string
   manifestType?: string | null
   origin?: string | null
@@ -2191,6 +2225,7 @@ export type ManifestUncheckedCreateWithoutCargoOwnerInput = {
   cargo?: Prisma.CargoUncheckedCreateNestedOneWithoutManifestInput
   processing?: Prisma.ManifestProcessingUncheckedCreateNestedOneWithoutManifestInput
   jobs?: Prisma.ManifestJobUncheckedCreateNestedManyWithoutManifestInput
+  corrections?: Prisma.ManifestFieldCorrectionUncheckedCreateNestedManyWithoutManifestInput
 }
 
 export type ManifestCreateOrConnectWithoutCargoOwnerInput = {
@@ -2206,7 +2241,7 @@ export type ManifestCreateManyCargoOwnerInputEnvelope = {
 export type ManifestCreateWithoutSenderInput = {
   id?: bigint | number
   manifestNumber: string
-  authorizationNumber: string
+  authorizationNumber?: string | null
   issueDate: Date | string
   manifestType?: string | null
   origin?: string | null
@@ -2241,13 +2276,14 @@ export type ManifestCreateWithoutSenderInput = {
   cargo?: Prisma.CargoCreateNestedOneWithoutManifestInput
   processing?: Prisma.ManifestProcessingCreateNestedOneWithoutManifestInput
   jobs?: Prisma.ManifestJobCreateNestedManyWithoutManifestInput
+  corrections?: Prisma.ManifestFieldCorrectionCreateNestedManyWithoutManifestInput
 }
 
 export type ManifestUncheckedCreateWithoutSenderInput = {
   id?: bigint | number
   companyId: bigint | number
   manifestNumber: string
-  authorizationNumber: string
+  authorizationNumber?: string | null
   issueDate: Date | string
   manifestType?: string | null
   origin?: string | null
@@ -2281,6 +2317,7 @@ export type ManifestUncheckedCreateWithoutSenderInput = {
   cargo?: Prisma.CargoUncheckedCreateNestedOneWithoutManifestInput
   processing?: Prisma.ManifestProcessingUncheckedCreateNestedOneWithoutManifestInput
   jobs?: Prisma.ManifestJobUncheckedCreateNestedManyWithoutManifestInput
+  corrections?: Prisma.ManifestFieldCorrectionUncheckedCreateNestedManyWithoutManifestInput
 }
 
 export type ManifestCreateOrConnectWithoutSenderInput = {
@@ -2296,7 +2333,7 @@ export type ManifestCreateManySenderInputEnvelope = {
 export type ManifestCreateWithoutRecipientInput = {
   id?: bigint | number
   manifestNumber: string
-  authorizationNumber: string
+  authorizationNumber?: string | null
   issueDate: Date | string
   manifestType?: string | null
   origin?: string | null
@@ -2331,13 +2368,14 @@ export type ManifestCreateWithoutRecipientInput = {
   cargo?: Prisma.CargoCreateNestedOneWithoutManifestInput
   processing?: Prisma.ManifestProcessingCreateNestedOneWithoutManifestInput
   jobs?: Prisma.ManifestJobCreateNestedManyWithoutManifestInput
+  corrections?: Prisma.ManifestFieldCorrectionCreateNestedManyWithoutManifestInput
 }
 
 export type ManifestUncheckedCreateWithoutRecipientInput = {
   id?: bigint | number
   companyId: bigint | number
   manifestNumber: string
-  authorizationNumber: string
+  authorizationNumber?: string | null
   issueDate: Date | string
   manifestType?: string | null
   origin?: string | null
@@ -2371,6 +2409,7 @@ export type ManifestUncheckedCreateWithoutRecipientInput = {
   cargo?: Prisma.CargoUncheckedCreateNestedOneWithoutManifestInput
   processing?: Prisma.ManifestProcessingUncheckedCreateNestedOneWithoutManifestInput
   jobs?: Prisma.ManifestJobUncheckedCreateNestedManyWithoutManifestInput
+  corrections?: Prisma.ManifestFieldCorrectionUncheckedCreateNestedManyWithoutManifestInput
 }
 
 export type ManifestCreateOrConnectWithoutRecipientInput = {
@@ -2434,7 +2473,7 @@ export type ManifestUpdateManyWithWhereWithoutRecipientInput = {
 export type ManifestCreateWithoutCargoInput = {
   id?: bigint | number
   manifestNumber: string
-  authorizationNumber: string
+  authorizationNumber?: string | null
   issueDate: Date | string
   manifestType?: string | null
   origin?: string | null
@@ -2469,13 +2508,14 @@ export type ManifestCreateWithoutCargoInput = {
   recipient?: Prisma.PersonOrCompanyCreateNestedOneWithoutRecipientManifestsInput
   processing?: Prisma.ManifestProcessingCreateNestedOneWithoutManifestInput
   jobs?: Prisma.ManifestJobCreateNestedManyWithoutManifestInput
+  corrections?: Prisma.ManifestFieldCorrectionCreateNestedManyWithoutManifestInput
 }
 
 export type ManifestUncheckedCreateWithoutCargoInput = {
   id?: bigint | number
   companyId: bigint | number
   manifestNumber: string
-  authorizationNumber: string
+  authorizationNumber?: string | null
   issueDate: Date | string
   manifestType?: string | null
   origin?: string | null
@@ -2509,6 +2549,7 @@ export type ManifestUncheckedCreateWithoutCargoInput = {
   updatedAt?: Date | string | null
   processing?: Prisma.ManifestProcessingUncheckedCreateNestedOneWithoutManifestInput
   jobs?: Prisma.ManifestJobUncheckedCreateNestedManyWithoutManifestInput
+  corrections?: Prisma.ManifestFieldCorrectionUncheckedCreateNestedManyWithoutManifestInput
 }
 
 export type ManifestCreateOrConnectWithoutCargoInput = {
@@ -2530,7 +2571,7 @@ export type ManifestUpdateToOneWithWhereWithoutCargoInput = {
 export type ManifestUpdateWithoutCargoInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   manifestNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  authorizationNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  authorizationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manifestType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   origin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2565,13 +2606,14 @@ export type ManifestUpdateWithoutCargoInput = {
   recipient?: Prisma.PersonOrCompanyUpdateOneWithoutRecipientManifestsNestedInput
   processing?: Prisma.ManifestProcessingUpdateOneWithoutManifestNestedInput
   jobs?: Prisma.ManifestJobUpdateManyWithoutManifestNestedInput
+  corrections?: Prisma.ManifestFieldCorrectionUpdateManyWithoutManifestNestedInput
 }
 
 export type ManifestUncheckedUpdateWithoutCargoInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   companyId?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   manifestNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  authorizationNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  authorizationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manifestType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   origin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2605,12 +2647,13 @@ export type ManifestUncheckedUpdateWithoutCargoInput = {
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   processing?: Prisma.ManifestProcessingUncheckedUpdateOneWithoutManifestNestedInput
   jobs?: Prisma.ManifestJobUncheckedUpdateManyWithoutManifestNestedInput
+  corrections?: Prisma.ManifestFieldCorrectionUncheckedUpdateManyWithoutManifestNestedInput
 }
 
 export type ManifestCreateWithoutProcessingInput = {
   id?: bigint | number
   manifestNumber: string
-  authorizationNumber: string
+  authorizationNumber?: string | null
   issueDate: Date | string
   manifestType?: string | null
   origin?: string | null
@@ -2645,13 +2688,14 @@ export type ManifestCreateWithoutProcessingInput = {
   recipient?: Prisma.PersonOrCompanyCreateNestedOneWithoutRecipientManifestsInput
   cargo?: Prisma.CargoCreateNestedOneWithoutManifestInput
   jobs?: Prisma.ManifestJobCreateNestedManyWithoutManifestInput
+  corrections?: Prisma.ManifestFieldCorrectionCreateNestedManyWithoutManifestInput
 }
 
 export type ManifestUncheckedCreateWithoutProcessingInput = {
   id?: bigint | number
   companyId: bigint | number
   manifestNumber: string
-  authorizationNumber: string
+  authorizationNumber?: string | null
   issueDate: Date | string
   manifestType?: string | null
   origin?: string | null
@@ -2685,6 +2729,7 @@ export type ManifestUncheckedCreateWithoutProcessingInput = {
   updatedAt?: Date | string | null
   cargo?: Prisma.CargoUncheckedCreateNestedOneWithoutManifestInput
   jobs?: Prisma.ManifestJobUncheckedCreateNestedManyWithoutManifestInput
+  corrections?: Prisma.ManifestFieldCorrectionUncheckedCreateNestedManyWithoutManifestInput
 }
 
 export type ManifestCreateOrConnectWithoutProcessingInput = {
@@ -2706,7 +2751,7 @@ export type ManifestUpdateToOneWithWhereWithoutProcessingInput = {
 export type ManifestUpdateWithoutProcessingInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   manifestNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  authorizationNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  authorizationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manifestType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   origin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2741,13 +2786,14 @@ export type ManifestUpdateWithoutProcessingInput = {
   recipient?: Prisma.PersonOrCompanyUpdateOneWithoutRecipientManifestsNestedInput
   cargo?: Prisma.CargoUpdateOneWithoutManifestNestedInput
   jobs?: Prisma.ManifestJobUpdateManyWithoutManifestNestedInput
+  corrections?: Prisma.ManifestFieldCorrectionUpdateManyWithoutManifestNestedInput
 }
 
 export type ManifestUncheckedUpdateWithoutProcessingInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   companyId?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   manifestNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  authorizationNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  authorizationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manifestType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   origin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2781,12 +2827,13 @@ export type ManifestUncheckedUpdateWithoutProcessingInput = {
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cargo?: Prisma.CargoUncheckedUpdateOneWithoutManifestNestedInput
   jobs?: Prisma.ManifestJobUncheckedUpdateManyWithoutManifestNestedInput
+  corrections?: Prisma.ManifestFieldCorrectionUncheckedUpdateManyWithoutManifestNestedInput
 }
 
 export type ManifestCreateWithoutJobsInput = {
   id?: bigint | number
   manifestNumber: string
-  authorizationNumber: string
+  authorizationNumber?: string | null
   issueDate: Date | string
   manifestType?: string | null
   origin?: string | null
@@ -2821,13 +2868,14 @@ export type ManifestCreateWithoutJobsInput = {
   recipient?: Prisma.PersonOrCompanyCreateNestedOneWithoutRecipientManifestsInput
   cargo?: Prisma.CargoCreateNestedOneWithoutManifestInput
   processing?: Prisma.ManifestProcessingCreateNestedOneWithoutManifestInput
+  corrections?: Prisma.ManifestFieldCorrectionCreateNestedManyWithoutManifestInput
 }
 
 export type ManifestUncheckedCreateWithoutJobsInput = {
   id?: bigint | number
   companyId: bigint | number
   manifestNumber: string
-  authorizationNumber: string
+  authorizationNumber?: string | null
   issueDate: Date | string
   manifestType?: string | null
   origin?: string | null
@@ -2861,6 +2909,7 @@ export type ManifestUncheckedCreateWithoutJobsInput = {
   updatedAt?: Date | string | null
   cargo?: Prisma.CargoUncheckedCreateNestedOneWithoutManifestInput
   processing?: Prisma.ManifestProcessingUncheckedCreateNestedOneWithoutManifestInput
+  corrections?: Prisma.ManifestFieldCorrectionUncheckedCreateNestedManyWithoutManifestInput
 }
 
 export type ManifestCreateOrConnectWithoutJobsInput = {
@@ -2882,7 +2931,7 @@ export type ManifestUpdateToOneWithWhereWithoutJobsInput = {
 export type ManifestUpdateWithoutJobsInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   manifestNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  authorizationNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  authorizationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manifestType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   origin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2917,13 +2966,14 @@ export type ManifestUpdateWithoutJobsInput = {
   recipient?: Prisma.PersonOrCompanyUpdateOneWithoutRecipientManifestsNestedInput
   cargo?: Prisma.CargoUpdateOneWithoutManifestNestedInput
   processing?: Prisma.ManifestProcessingUpdateOneWithoutManifestNestedInput
+  corrections?: Prisma.ManifestFieldCorrectionUpdateManyWithoutManifestNestedInput
 }
 
 export type ManifestUncheckedUpdateWithoutJobsInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   companyId?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   manifestNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  authorizationNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  authorizationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manifestType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   origin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2957,12 +3007,193 @@ export type ManifestUncheckedUpdateWithoutJobsInput = {
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cargo?: Prisma.CargoUncheckedUpdateOneWithoutManifestNestedInput
   processing?: Prisma.ManifestProcessingUncheckedUpdateOneWithoutManifestNestedInput
+  corrections?: Prisma.ManifestFieldCorrectionUncheckedUpdateManyWithoutManifestNestedInput
+}
+
+export type ManifestCreateWithoutCorrectionsInput = {
+  id?: bigint | number
+  manifestNumber: string
+  authorizationNumber?: string | null
+  issueDate: Date | string
+  manifestType?: string | null
+  origin?: string | null
+  intermediateCity?: string | null
+  destination?: string | null
+  policyOwnerName?: string | null
+  totalTripValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  withholdingTax?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  icaWithholding?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  netValueToPay?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  advanceValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  balanceToPay?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  paymentLocation?: string | null
+  paymentDate?: Date | string | null
+  loadingPaidBy?: string | null
+  unloadingPaidBy?: string | null
+  agreedValueInWords?: string | null
+  recommendations?: string | null
+  pdfFileName?: string | null
+  pdfFileUrl?: string | null
+  pdfFileHash?: string | null
+  status?: $Enums.ManifestStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string | null
+  company: Prisma.CompanyCreateNestedOneWithoutManifestsInput
+  driver?: Prisma.DriverCreateNestedOneWithoutManifestsInput
+  vehicle?: Prisma.VehicleCreateNestedOneWithoutManifestsInput
+  vehicleHolder?: Prisma.VehicleHolderCreateNestedOneWithoutManifestsInput
+  manifestHolder?: Prisma.ManifestHolderCreateNestedOneWithoutManifestsInput
+  cargoOwner?: Prisma.PersonOrCompanyCreateNestedOneWithoutCargoOwnerManifestsInput
+  sender?: Prisma.PersonOrCompanyCreateNestedOneWithoutSenderManifestsInput
+  recipient?: Prisma.PersonOrCompanyCreateNestedOneWithoutRecipientManifestsInput
+  cargo?: Prisma.CargoCreateNestedOneWithoutManifestInput
+  processing?: Prisma.ManifestProcessingCreateNestedOneWithoutManifestInput
+  jobs?: Prisma.ManifestJobCreateNestedManyWithoutManifestInput
+}
+
+export type ManifestUncheckedCreateWithoutCorrectionsInput = {
+  id?: bigint | number
+  companyId: bigint | number
+  manifestNumber: string
+  authorizationNumber?: string | null
+  issueDate: Date | string
+  manifestType?: string | null
+  origin?: string | null
+  intermediateCity?: string | null
+  destination?: string | null
+  driverId?: bigint | number | null
+  vehicleId?: bigint | number | null
+  vehicleHolderId?: bigint | number | null
+  manifestHolderId?: bigint | number | null
+  cargoOwnerId?: bigint | number | null
+  senderId?: bigint | number | null
+  recipientId?: bigint | number | null
+  policyOwnerName?: string | null
+  totalTripValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  withholdingTax?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  icaWithholding?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  netValueToPay?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  advanceValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  balanceToPay?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  paymentLocation?: string | null
+  paymentDate?: Date | string | null
+  loadingPaidBy?: string | null
+  unloadingPaidBy?: string | null
+  agreedValueInWords?: string | null
+  recommendations?: string | null
+  pdfFileName?: string | null
+  pdfFileUrl?: string | null
+  pdfFileHash?: string | null
+  status?: $Enums.ManifestStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string | null
+  cargo?: Prisma.CargoUncheckedCreateNestedOneWithoutManifestInput
+  processing?: Prisma.ManifestProcessingUncheckedCreateNestedOneWithoutManifestInput
+  jobs?: Prisma.ManifestJobUncheckedCreateNestedManyWithoutManifestInput
+}
+
+export type ManifestCreateOrConnectWithoutCorrectionsInput = {
+  where: Prisma.ManifestWhereUniqueInput
+  create: Prisma.XOR<Prisma.ManifestCreateWithoutCorrectionsInput, Prisma.ManifestUncheckedCreateWithoutCorrectionsInput>
+}
+
+export type ManifestUpsertWithoutCorrectionsInput = {
+  update: Prisma.XOR<Prisma.ManifestUpdateWithoutCorrectionsInput, Prisma.ManifestUncheckedUpdateWithoutCorrectionsInput>
+  create: Prisma.XOR<Prisma.ManifestCreateWithoutCorrectionsInput, Prisma.ManifestUncheckedCreateWithoutCorrectionsInput>
+  where?: Prisma.ManifestWhereInput
+}
+
+export type ManifestUpdateToOneWithWhereWithoutCorrectionsInput = {
+  where?: Prisma.ManifestWhereInput
+  data: Prisma.XOR<Prisma.ManifestUpdateWithoutCorrectionsInput, Prisma.ManifestUncheckedUpdateWithoutCorrectionsInput>
+}
+
+export type ManifestUpdateWithoutCorrectionsInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  manifestNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  authorizationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  manifestType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  origin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  intermediateCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  destination?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  policyOwnerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totalTripValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  withholdingTax?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  icaWithholding?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  netValueToPay?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  advanceValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  balanceToPay?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  paymentLocation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  loadingPaidBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unloadingPaidBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  agreedValueInWords?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recommendations?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pdfFileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pdfFileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pdfFileHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumManifestStatusFieldUpdateOperationsInput | $Enums.ManifestStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  company?: Prisma.CompanyUpdateOneRequiredWithoutManifestsNestedInput
+  driver?: Prisma.DriverUpdateOneWithoutManifestsNestedInput
+  vehicle?: Prisma.VehicleUpdateOneWithoutManifestsNestedInput
+  vehicleHolder?: Prisma.VehicleHolderUpdateOneWithoutManifestsNestedInput
+  manifestHolder?: Prisma.ManifestHolderUpdateOneWithoutManifestsNestedInput
+  cargoOwner?: Prisma.PersonOrCompanyUpdateOneWithoutCargoOwnerManifestsNestedInput
+  sender?: Prisma.PersonOrCompanyUpdateOneWithoutSenderManifestsNestedInput
+  recipient?: Prisma.PersonOrCompanyUpdateOneWithoutRecipientManifestsNestedInput
+  cargo?: Prisma.CargoUpdateOneWithoutManifestNestedInput
+  processing?: Prisma.ManifestProcessingUpdateOneWithoutManifestNestedInput
+  jobs?: Prisma.ManifestJobUpdateManyWithoutManifestNestedInput
+}
+
+export type ManifestUncheckedUpdateWithoutCorrectionsInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  companyId?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  manifestNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  authorizationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  manifestType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  origin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  intermediateCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  destination?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  driverId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  vehicleId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  vehicleHolderId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  manifestHolderId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  cargoOwnerId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  senderId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  recipientId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  policyOwnerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totalTripValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  withholdingTax?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  icaWithholding?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  netValueToPay?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  advanceValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  balanceToPay?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  paymentLocation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  loadingPaidBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unloadingPaidBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  agreedValueInWords?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recommendations?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pdfFileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pdfFileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pdfFileHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumManifestStatusFieldUpdateOperationsInput | $Enums.ManifestStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cargo?: Prisma.CargoUncheckedUpdateOneWithoutManifestNestedInput
+  processing?: Prisma.ManifestProcessingUncheckedUpdateOneWithoutManifestNestedInput
+  jobs?: Prisma.ManifestJobUncheckedUpdateManyWithoutManifestNestedInput
 }
 
 export type ManifestCreateManyCompanyInput = {
   id?: bigint | number
   manifestNumber: string
-  authorizationNumber: string
+  authorizationNumber?: string | null
   issueDate: Date | string
   manifestType?: string | null
   origin?: string | null
@@ -2999,7 +3230,7 @@ export type ManifestCreateManyCompanyInput = {
 export type ManifestUpdateWithoutCompanyInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   manifestNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  authorizationNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  authorizationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manifestType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   origin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3034,12 +3265,13 @@ export type ManifestUpdateWithoutCompanyInput = {
   cargo?: Prisma.CargoUpdateOneWithoutManifestNestedInput
   processing?: Prisma.ManifestProcessingUpdateOneWithoutManifestNestedInput
   jobs?: Prisma.ManifestJobUpdateManyWithoutManifestNestedInput
+  corrections?: Prisma.ManifestFieldCorrectionUpdateManyWithoutManifestNestedInput
 }
 
 export type ManifestUncheckedUpdateWithoutCompanyInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   manifestNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  authorizationNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  authorizationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manifestType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   origin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3074,12 +3306,13 @@ export type ManifestUncheckedUpdateWithoutCompanyInput = {
   cargo?: Prisma.CargoUncheckedUpdateOneWithoutManifestNestedInput
   processing?: Prisma.ManifestProcessingUncheckedUpdateOneWithoutManifestNestedInput
   jobs?: Prisma.ManifestJobUncheckedUpdateManyWithoutManifestNestedInput
+  corrections?: Prisma.ManifestFieldCorrectionUncheckedUpdateManyWithoutManifestNestedInput
 }
 
 export type ManifestUncheckedUpdateManyWithoutCompanyInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   manifestNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  authorizationNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  authorizationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manifestType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   origin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3117,7 +3350,7 @@ export type ManifestCreateManyDriverInput = {
   id?: bigint | number
   companyId: bigint | number
   manifestNumber: string
-  authorizationNumber: string
+  authorizationNumber?: string | null
   issueDate: Date | string
   manifestType?: string | null
   origin?: string | null
@@ -3153,7 +3386,7 @@ export type ManifestCreateManyDriverInput = {
 export type ManifestUpdateWithoutDriverInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   manifestNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  authorizationNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  authorizationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manifestType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   origin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3188,13 +3421,14 @@ export type ManifestUpdateWithoutDriverInput = {
   cargo?: Prisma.CargoUpdateOneWithoutManifestNestedInput
   processing?: Prisma.ManifestProcessingUpdateOneWithoutManifestNestedInput
   jobs?: Prisma.ManifestJobUpdateManyWithoutManifestNestedInput
+  corrections?: Prisma.ManifestFieldCorrectionUpdateManyWithoutManifestNestedInput
 }
 
 export type ManifestUncheckedUpdateWithoutDriverInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   companyId?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   manifestNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  authorizationNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  authorizationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manifestType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   origin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3228,13 +3462,14 @@ export type ManifestUncheckedUpdateWithoutDriverInput = {
   cargo?: Prisma.CargoUncheckedUpdateOneWithoutManifestNestedInput
   processing?: Prisma.ManifestProcessingUncheckedUpdateOneWithoutManifestNestedInput
   jobs?: Prisma.ManifestJobUncheckedUpdateManyWithoutManifestNestedInput
+  corrections?: Prisma.ManifestFieldCorrectionUncheckedUpdateManyWithoutManifestNestedInput
 }
 
 export type ManifestUncheckedUpdateManyWithoutDriverInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   companyId?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   manifestNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  authorizationNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  authorizationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manifestType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   origin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3271,7 +3506,7 @@ export type ManifestCreateManyVehicleHolderInput = {
   id?: bigint | number
   companyId: bigint | number
   manifestNumber: string
-  authorizationNumber: string
+  authorizationNumber?: string | null
   issueDate: Date | string
   manifestType?: string | null
   origin?: string | null
@@ -3307,7 +3542,7 @@ export type ManifestCreateManyVehicleHolderInput = {
 export type ManifestUpdateWithoutVehicleHolderInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   manifestNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  authorizationNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  authorizationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manifestType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   origin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3342,13 +3577,14 @@ export type ManifestUpdateWithoutVehicleHolderInput = {
   cargo?: Prisma.CargoUpdateOneWithoutManifestNestedInput
   processing?: Prisma.ManifestProcessingUpdateOneWithoutManifestNestedInput
   jobs?: Prisma.ManifestJobUpdateManyWithoutManifestNestedInput
+  corrections?: Prisma.ManifestFieldCorrectionUpdateManyWithoutManifestNestedInput
 }
 
 export type ManifestUncheckedUpdateWithoutVehicleHolderInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   companyId?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   manifestNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  authorizationNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  authorizationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manifestType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   origin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3382,13 +3618,14 @@ export type ManifestUncheckedUpdateWithoutVehicleHolderInput = {
   cargo?: Prisma.CargoUncheckedUpdateOneWithoutManifestNestedInput
   processing?: Prisma.ManifestProcessingUncheckedUpdateOneWithoutManifestNestedInput
   jobs?: Prisma.ManifestJobUncheckedUpdateManyWithoutManifestNestedInput
+  corrections?: Prisma.ManifestFieldCorrectionUncheckedUpdateManyWithoutManifestNestedInput
 }
 
 export type ManifestUncheckedUpdateManyWithoutVehicleHolderInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   companyId?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   manifestNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  authorizationNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  authorizationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manifestType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   origin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3425,7 +3662,7 @@ export type ManifestCreateManyManifestHolderInput = {
   id?: bigint | number
   companyId: bigint | number
   manifestNumber: string
-  authorizationNumber: string
+  authorizationNumber?: string | null
   issueDate: Date | string
   manifestType?: string | null
   origin?: string | null
@@ -3461,7 +3698,7 @@ export type ManifestCreateManyManifestHolderInput = {
 export type ManifestUpdateWithoutManifestHolderInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   manifestNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  authorizationNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  authorizationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manifestType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   origin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3496,13 +3733,14 @@ export type ManifestUpdateWithoutManifestHolderInput = {
   cargo?: Prisma.CargoUpdateOneWithoutManifestNestedInput
   processing?: Prisma.ManifestProcessingUpdateOneWithoutManifestNestedInput
   jobs?: Prisma.ManifestJobUpdateManyWithoutManifestNestedInput
+  corrections?: Prisma.ManifestFieldCorrectionUpdateManyWithoutManifestNestedInput
 }
 
 export type ManifestUncheckedUpdateWithoutManifestHolderInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   companyId?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   manifestNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  authorizationNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  authorizationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manifestType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   origin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3536,13 +3774,14 @@ export type ManifestUncheckedUpdateWithoutManifestHolderInput = {
   cargo?: Prisma.CargoUncheckedUpdateOneWithoutManifestNestedInput
   processing?: Prisma.ManifestProcessingUncheckedUpdateOneWithoutManifestNestedInput
   jobs?: Prisma.ManifestJobUncheckedUpdateManyWithoutManifestNestedInput
+  corrections?: Prisma.ManifestFieldCorrectionUncheckedUpdateManyWithoutManifestNestedInput
 }
 
 export type ManifestUncheckedUpdateManyWithoutManifestHolderInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   companyId?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   manifestNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  authorizationNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  authorizationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manifestType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   origin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3579,7 +3818,7 @@ export type ManifestCreateManyVehicleInput = {
   id?: bigint | number
   companyId: bigint | number
   manifestNumber: string
-  authorizationNumber: string
+  authorizationNumber?: string | null
   issueDate: Date | string
   manifestType?: string | null
   origin?: string | null
@@ -3615,7 +3854,7 @@ export type ManifestCreateManyVehicleInput = {
 export type ManifestUpdateWithoutVehicleInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   manifestNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  authorizationNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  authorizationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manifestType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   origin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3650,13 +3889,14 @@ export type ManifestUpdateWithoutVehicleInput = {
   cargo?: Prisma.CargoUpdateOneWithoutManifestNestedInput
   processing?: Prisma.ManifestProcessingUpdateOneWithoutManifestNestedInput
   jobs?: Prisma.ManifestJobUpdateManyWithoutManifestNestedInput
+  corrections?: Prisma.ManifestFieldCorrectionUpdateManyWithoutManifestNestedInput
 }
 
 export type ManifestUncheckedUpdateWithoutVehicleInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   companyId?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   manifestNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  authorizationNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  authorizationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manifestType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   origin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3690,13 +3930,14 @@ export type ManifestUncheckedUpdateWithoutVehicleInput = {
   cargo?: Prisma.CargoUncheckedUpdateOneWithoutManifestNestedInput
   processing?: Prisma.ManifestProcessingUncheckedUpdateOneWithoutManifestNestedInput
   jobs?: Prisma.ManifestJobUncheckedUpdateManyWithoutManifestNestedInput
+  corrections?: Prisma.ManifestFieldCorrectionUncheckedUpdateManyWithoutManifestNestedInput
 }
 
 export type ManifestUncheckedUpdateManyWithoutVehicleInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   companyId?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   manifestNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  authorizationNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  authorizationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manifestType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   origin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3733,7 +3974,7 @@ export type ManifestCreateManyCargoOwnerInput = {
   id?: bigint | number
   companyId: bigint | number
   manifestNumber: string
-  authorizationNumber: string
+  authorizationNumber?: string | null
   issueDate: Date | string
   manifestType?: string | null
   origin?: string | null
@@ -3770,7 +4011,7 @@ export type ManifestCreateManySenderInput = {
   id?: bigint | number
   companyId: bigint | number
   manifestNumber: string
-  authorizationNumber: string
+  authorizationNumber?: string | null
   issueDate: Date | string
   manifestType?: string | null
   origin?: string | null
@@ -3807,7 +4048,7 @@ export type ManifestCreateManyRecipientInput = {
   id?: bigint | number
   companyId: bigint | number
   manifestNumber: string
-  authorizationNumber: string
+  authorizationNumber?: string | null
   issueDate: Date | string
   manifestType?: string | null
   origin?: string | null
@@ -3843,7 +4084,7 @@ export type ManifestCreateManyRecipientInput = {
 export type ManifestUpdateWithoutCargoOwnerInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   manifestNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  authorizationNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  authorizationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manifestType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   origin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3878,13 +4119,14 @@ export type ManifestUpdateWithoutCargoOwnerInput = {
   cargo?: Prisma.CargoUpdateOneWithoutManifestNestedInput
   processing?: Prisma.ManifestProcessingUpdateOneWithoutManifestNestedInput
   jobs?: Prisma.ManifestJobUpdateManyWithoutManifestNestedInput
+  corrections?: Prisma.ManifestFieldCorrectionUpdateManyWithoutManifestNestedInput
 }
 
 export type ManifestUncheckedUpdateWithoutCargoOwnerInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   companyId?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   manifestNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  authorizationNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  authorizationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manifestType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   origin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3918,13 +4160,14 @@ export type ManifestUncheckedUpdateWithoutCargoOwnerInput = {
   cargo?: Prisma.CargoUncheckedUpdateOneWithoutManifestNestedInput
   processing?: Prisma.ManifestProcessingUncheckedUpdateOneWithoutManifestNestedInput
   jobs?: Prisma.ManifestJobUncheckedUpdateManyWithoutManifestNestedInput
+  corrections?: Prisma.ManifestFieldCorrectionUncheckedUpdateManyWithoutManifestNestedInput
 }
 
 export type ManifestUncheckedUpdateManyWithoutCargoOwnerInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   companyId?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   manifestNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  authorizationNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  authorizationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manifestType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   origin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3960,7 +4203,7 @@ export type ManifestUncheckedUpdateManyWithoutCargoOwnerInput = {
 export type ManifestUpdateWithoutSenderInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   manifestNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  authorizationNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  authorizationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manifestType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   origin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3995,13 +4238,14 @@ export type ManifestUpdateWithoutSenderInput = {
   cargo?: Prisma.CargoUpdateOneWithoutManifestNestedInput
   processing?: Prisma.ManifestProcessingUpdateOneWithoutManifestNestedInput
   jobs?: Prisma.ManifestJobUpdateManyWithoutManifestNestedInput
+  corrections?: Prisma.ManifestFieldCorrectionUpdateManyWithoutManifestNestedInput
 }
 
 export type ManifestUncheckedUpdateWithoutSenderInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   companyId?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   manifestNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  authorizationNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  authorizationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manifestType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   origin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4035,13 +4279,14 @@ export type ManifestUncheckedUpdateWithoutSenderInput = {
   cargo?: Prisma.CargoUncheckedUpdateOneWithoutManifestNestedInput
   processing?: Prisma.ManifestProcessingUncheckedUpdateOneWithoutManifestNestedInput
   jobs?: Prisma.ManifestJobUncheckedUpdateManyWithoutManifestNestedInput
+  corrections?: Prisma.ManifestFieldCorrectionUncheckedUpdateManyWithoutManifestNestedInput
 }
 
 export type ManifestUncheckedUpdateManyWithoutSenderInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   companyId?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   manifestNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  authorizationNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  authorizationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manifestType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   origin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4077,7 +4322,7 @@ export type ManifestUncheckedUpdateManyWithoutSenderInput = {
 export type ManifestUpdateWithoutRecipientInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   manifestNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  authorizationNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  authorizationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manifestType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   origin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4112,13 +4357,14 @@ export type ManifestUpdateWithoutRecipientInput = {
   cargo?: Prisma.CargoUpdateOneWithoutManifestNestedInput
   processing?: Prisma.ManifestProcessingUpdateOneWithoutManifestNestedInput
   jobs?: Prisma.ManifestJobUpdateManyWithoutManifestNestedInput
+  corrections?: Prisma.ManifestFieldCorrectionUpdateManyWithoutManifestNestedInput
 }
 
 export type ManifestUncheckedUpdateWithoutRecipientInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   companyId?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   manifestNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  authorizationNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  authorizationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manifestType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   origin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4152,13 +4398,14 @@ export type ManifestUncheckedUpdateWithoutRecipientInput = {
   cargo?: Prisma.CargoUncheckedUpdateOneWithoutManifestNestedInput
   processing?: Prisma.ManifestProcessingUncheckedUpdateOneWithoutManifestNestedInput
   jobs?: Prisma.ManifestJobUncheckedUpdateManyWithoutManifestNestedInput
+  corrections?: Prisma.ManifestFieldCorrectionUncheckedUpdateManyWithoutManifestNestedInput
 }
 
 export type ManifestUncheckedUpdateManyWithoutRecipientInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   companyId?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   manifestNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  authorizationNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  authorizationNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manifestType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   origin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4198,10 +4445,12 @@ export type ManifestUncheckedUpdateManyWithoutRecipientInput = {
 
 export type ManifestCountOutputType = {
   jobs: number
+  corrections: number
 }
 
 export type ManifestCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   jobs?: boolean | ManifestCountOutputTypeCountJobsArgs
+  corrections?: boolean | ManifestCountOutputTypeCountCorrectionsArgs
 }
 
 /**
@@ -4219,6 +4468,13 @@ export type ManifestCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Ext
  */
 export type ManifestCountOutputTypeCountJobsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.ManifestJobWhereInput
+}
+
+/**
+ * ManifestCountOutputType without action
+ */
+export type ManifestCountOutputTypeCountCorrectionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ManifestFieldCorrectionWhereInput
 }
 
 
@@ -4269,6 +4525,7 @@ export type ManifestSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   cargo?: boolean | Prisma.Manifest$cargoArgs<ExtArgs>
   processing?: boolean | Prisma.Manifest$processingArgs<ExtArgs>
   jobs?: boolean | Prisma.Manifest$jobsArgs<ExtArgs>
+  corrections?: boolean | Prisma.Manifest$correctionsArgs<ExtArgs>
   _count?: boolean | Prisma.ManifestCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["manifest"]>
 
@@ -4415,6 +4672,7 @@ export type ManifestInclude<ExtArgs extends runtime.Types.Extensions.InternalArg
   cargo?: boolean | Prisma.Manifest$cargoArgs<ExtArgs>
   processing?: boolean | Prisma.Manifest$processingArgs<ExtArgs>
   jobs?: boolean | Prisma.Manifest$jobsArgs<ExtArgs>
+  corrections?: boolean | Prisma.Manifest$correctionsArgs<ExtArgs>
   _count?: boolean | Prisma.ManifestCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ManifestIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -4452,12 +4710,13 @@ export type $ManifestPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     cargo: Prisma.$CargoPayload<ExtArgs> | null
     processing: Prisma.$ManifestProcessingPayload<ExtArgs> | null
     jobs: Prisma.$ManifestJobPayload<ExtArgs>[]
+    corrections: Prisma.$ManifestFieldCorrectionPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: bigint
     companyId: bigint
     manifestNumber: string
-    authorizationNumber: string
+    authorizationNumber: string | null
     issueDate: Date
     manifestType: string | null
     origin: string | null
@@ -4894,6 +5153,7 @@ export interface Prisma__ManifestClient<T, Null = never, ExtArgs extends runtime
   cargo<T extends Prisma.Manifest$cargoArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Manifest$cargoArgs<ExtArgs>>): Prisma.Prisma__CargoClient<runtime.Types.Result.GetResult<Prisma.$CargoPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   processing<T extends Prisma.Manifest$processingArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Manifest$processingArgs<ExtArgs>>): Prisma.Prisma__ManifestProcessingClient<runtime.Types.Result.GetResult<Prisma.$ManifestProcessingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   jobs<T extends Prisma.Manifest$jobsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Manifest$jobsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ManifestJobPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  corrections<T extends Prisma.Manifest$correctionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Manifest$correctionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ManifestFieldCorrectionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -5551,6 +5811,30 @@ export type Manifest$jobsArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   take?: number
   skip?: number
   distinct?: Prisma.ManifestJobScalarFieldEnum | Prisma.ManifestJobScalarFieldEnum[]
+}
+
+/**
+ * Manifest.corrections
+ */
+export type Manifest$correctionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ManifestFieldCorrection
+   */
+  select?: Prisma.ManifestFieldCorrectionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ManifestFieldCorrection
+   */
+  omit?: Prisma.ManifestFieldCorrectionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ManifestFieldCorrectionInclude<ExtArgs> | null
+  where?: Prisma.ManifestFieldCorrectionWhereInput
+  orderBy?: Prisma.ManifestFieldCorrectionOrderByWithRelationInput | Prisma.ManifestFieldCorrectionOrderByWithRelationInput[]
+  cursor?: Prisma.ManifestFieldCorrectionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ManifestFieldCorrectionScalarFieldEnum | Prisma.ManifestFieldCorrectionScalarFieldEnum[]
 }
 
 /**

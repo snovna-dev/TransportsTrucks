@@ -1,125 +1,94 @@
-# TransportsTrucks - Paso 7: cargue asíncrono del PDF
+# TransportsTrucks
 
-Este paso convierte el cargue en el punto de entrada real del pipeline.
+Carga de PDF de manifiestos electrónicos de carga (RNDC), extracción automática, revisión manual de los campos dudosos y consulta.
 
 ## Flujo
 
 ```text
-Usuario
-  ↓
-POST /api/manifests/upload
-  ↓
-SHA-256
-  ↓
-ManifestJob (idempotencia)
-  ↓
-Google Drive
-  ↓
-ManifestJob = QUEUED
-  ↓
-Pub/Sub { jobId }
+/manifests/upload ──► POST /api/manifests/upload
+                        │  valida PDF (≤ MAX_UPLOAD_MB), SHA-256, ManifestJob (idempotencia)
+                        │  guarda el PDF (STORAGE_PROVIDER: db | local | drive)
+                        ▼
+                  processManifestJob(jobId)      ← en la misma petición (PROCESSING_MODE=sync)
+                        │                          o vía Pub/Sub → /api/manifest-jobs/worker
+                        ├─ confianza alta ──► Manifest + Cargo + entidades (COMPLETED)
+                        └─ campos dudosos ──► ManifestJob.REVIEW_REQUIRED
+                                               (rawText, extractedJson, overallConfidence)
+                                                     │
+                       /manifests/review/[jobId] ◄───┘  PDF a la izquierda, datos a la derecha
+                        │  PATCH /api/manifest-jobs/[id]/review   (borrador + auditoría)
+                        └─ POST  /api/manifest-jobs/[id]/complete (crea o sobrescribe el Manifest)
 ```
 
-Todavía no crea `Manifest`. La creación del manifiesto definitivo queda para el worker después de la extracción y revisión.
+## Pantallas
 
-## 1. Dependencias
+| Ruta | Qué hace |
+|---|---|
+| `/manifests/upload` | Cargar un PDF; muestra el resultado y enlaza a la revisión o al manifiesto. |
+| `/manifests` | Cargues pendientes o con error (con botón Reprocesar) y listado de manifiestos con búsqueda. |
+| `/manifests/[id]` | Detalle del manifiesto, PDF original, correcciones manuales y cargues. |
+| `/manifests/review` | Cargues en `REVIEW_REQUIRED` o `ERROR`. |
+| `/manifests/review/[jobId]` | Revisión en dos paneles. Se resaltan los campos dudosos; los demás se pueden editar con “Ver y editar todos los campos”. |
 
-Ya deben existir en el proyecto:
+## API
 
-- `googleapis`
-- `@google-cloud/pubsub`
-- `@prisma/client` / Prisma 7
-- `next`
+| Método y ruta | Uso |
+|---|---|
+| `POST /api/manifests/upload` | Cargue (`multipart/form-data`, campo `file`). |
+| `GET /api/manifest-jobs?status=REVIEW_REQUIRED,ERROR` | Lista de jobs. |
+| `GET /api/manifest-jobs/[id]` | Job, extracción y campos a revisar. |
+| `PATCH /api/manifest-jobs/[id]/review` | `{ "values": { "manifest.authorizationNumber": "123" } }` guarda correcciones. |
+| `POST /api/manifest-jobs/[id]/complete` | Aplica `values` (opcional), confirma lo demás y guarda el Manifest. |
+| `POST /api/manifest-jobs/[id]/process` | Reprocesa (`?force=1` vuelve a extraer un job en revisión). |
+| `GET /api/manifest-jobs/[id]/pdf` | PDF original (sin enlaces públicos de Drive). |
+| `POST /api/manifest-jobs/worker?token=…` | Push de Pub/Sub (solo con `PROCESSING_MODE=pubsub`). |
+| `GET /api/google/drive/authorize` | Obtiene el refresh token de Drive (solo con `GOOGLE_OAUTH_SETUP_ENABLED=true`). |
 
-No usar `pdf-parse`; el parser validado usa `unpdf`.
+## Reglas de campos
 
-## 2. Prisma
+Definidas en `src/lib/manifest-fields.ts`:
 
-Se agregó:
+- **MUST_HAVE** (NIT y razón social de la empresa, número y fecha del manifiesto, conductor, placa, remesa): sin ellos no se guarda.
+- **EXPECTED** (autorización, origen, destino, titulares, remitente, destinatario, datos de carga): si faltan o son dudosos, el manifiesto va a revisión, pero se pueden dejar vacíos.
+- **OPTIONAL_CHECKED** (semirremolque, SOAT, marca, configuración, peso vacío, licencia): solo se revisan si vienen con baja confianza; si no existen en la variante, no bloquean.
+- La autorización se busca también en las páginas 2 en adelante (variante Pacar). Si aparece allí, queda marcada para que la confirme.
+- Reenviar un manifiesto con el mismo número **sobrescribe** el existente. Una autorización ausente no borra la ya registrada.
+- Cada corrección queda en `manifest_field_corrections` (campo, valor original, valor corregido, confianza original, fecha, fuente `USER`).
 
-- `ManifestJobStatus`
-- relación `Manifest.jobs`
-- `ManifestJob`
-- `rawText`, `extractedJson`, `overallConfidence` dentro de `ManifestJob` para permitir revisión antes de crear el `Manifest` definitivo.
-
-Con Clever Cloud, usar:
+## Puesta en marcha
 
 ```powershell
-npx prisma db push
+copy .env.example .env.local     # y completar DATABASE_URL
+npm install
+npx prisma db push               # aplica los cambios del schema (ver abajo)
 npx prisma generate
+npm run dev                      # http://localhost:3000/manifests
 ```
 
-No ejecutar `prisma migrate dev` contra la base de datos si el usuario no tiene permisos para crear la shadow database.
+Cambios de schema de este paso (todos compatibles con datos existentes):
 
-## 3. Variables de entorno
+- `manifests.authorization_number` pasa a ser opcional (sigue siendo único).
+- `manifest_jobs`: nuevas columnas `storage_provider`, `storage_key`, `file_size`, `pdf_data`, `reviewed_at`.
+- Nueva tabla `manifest_field_corrections`.
 
-Completar `.env.local` con:
+Con Clever Cloud se usa `prisma db push` (no `migrate dev`, que necesita la shadow database).
 
-```env
-DATABASE_URL="..."
-GOOGLE_CLOUD_PROJECT_ID="..."
-PUBSUB_MANIFEST_TOPIC="manifest-processing"
-GOOGLE_DRIVE_FOLDER_ID="..."
-GOOGLE_SERVICE_ACCOUNT_EMAIL="..."
-GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+## Scripts
+
+```powershell
+npm run typecheck
+npm run test:parser:variants -- "ruta\a.pdf" "ruta\b.pdf"
+npm run test:extraction -- "ruta\a.pdf"
+npm run test:processing -- "ruta\a.pdf"   # crea el job y lo procesa contra la BD de .env.local
 ```
 
-La carpeta de Drive debe estar compartida con la cuenta de servicio que realiza el upload.
+## Netlify
 
-## 4. Endpoint
+- El cuerpo de una petición está limitado a ~6 MB, por eso `MAX_UPLOAD_MB=4`.
+- Las funciones tienen 10 s por defecto (configurable hasta 26 s); procesar un PDF digital tarda 1 a 3 s.
+- Con `STORAGE_PROVIDER=db` no hace falta Google para funcionar. Para Drive: crear credenciales OAuth (aplicación web) en Google Cloud, configurar las variables `GOOGLE_OAUTH_*`, visitar `/api/google/drive/authorize` con `GOOGLE_OAUTH_SETUP_ENABLED=true`, copiar el refresh token y poner `STORAGE_PROVIDER=drive`.
 
-```http
-POST /api/manifests/upload
-Content-Type: multipart/form-data
-```
+## Pendiente (decisiones abiertas)
 
-Campo requerido:
-
-```text
-file = archivo PDF
-```
-
-Valida:
-
-- existencia del archivo
-- tamaño máximo de 20 MB
-- firma `%PDF-`
-- SHA-256 para idempotencia
-
-## 5. Respuestas
-
-Nuevo archivo:
-
-```json
-{
-  "success": true,
-  "duplicate": false,
-  "jobId": "1",
-  "status": "QUEUED",
-  "driveFileId": "...",
-  "messageId": "..."
-}
-```
-
-Archivo repetido por el mismo SHA-256:
-
-```json
-{
-  "success": true,
-  "duplicate": true,
-  "jobId": "1",
-  "status": "QUEUED"
-}
-```
-
-## 6. Componente visual
-
-`ManifestUploadForm.tsx` es un ejemplo mínimo para conectarlo a `src/app/manifests/upload/page.tsx`.
-
-## 7. Importante para REVIEW_REQUIRED
-
-Cuando el worker encuentre, por ejemplo, la variante 3 sin autorización, no debe intentar insertar un `Manifest` incompleto.
-
-Debe guardar temporalmente la extracción en `ManifestJob.extractedJson` / `rawText` / `overallConfidence` y dejar el job en `REVIEW_REQUIRED`.
-
-Luego la pantalla de revisión permitirá completar `authorizationNumber` y cualquier otro campo faltante. Solo después se ejecuta la persistencia definitiva de `Manifest`, `Cargo` y entidades relacionadas.
+- Remesas 1:N (`Remittance`) para manifiestos multiparada: hoy `Cargo` sigue siendo 1:1.
+- `ManifestProcessing` sigue siendo 1:1 con `Manifest` (último procesamiento); el historial de intentos vive en `ManifestJob.attempts` y en las correcciones.

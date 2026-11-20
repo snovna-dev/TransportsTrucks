@@ -4,8 +4,13 @@ import { extractTextItems, type StructuredTextItem } from "unpdf";
 export interface PdfLayoutTextItem extends StructuredTextItem {}
 
 export interface PdfExtractionResult {
+  /** Texto de la página 1: es la entrada validada de los parsers. */
   text: string;
   layoutText: string;
+  /** Texto reconstruido de cada página (índice 0 = página 1). */
+  pageTexts: string[];
+  /** Texto de todas las páginas, para trazabilidad y búsquedas complementarias. */
+  fullText: string;
   pageCount: number;
   hasText: boolean;
   items: PdfLayoutTextItem[][];
@@ -115,12 +120,17 @@ export async function extractPdfText(
   try {
     const data = new Uint8Array(input);
     const result = await extractTextItems(data);
-    // El manifiesto de negocio se procesa únicamente con la página 1.
-    // pageCount conserva el total real del PDF para trazabilidad.
-    const firstPageItems = result.items.slice(0, 1);
-    const layoutText = buildDocumentLayout(firstPageItems);
+    // Los parsers se validaron con la página 1, así que `text` sigue siendo
+    // solo esa página. Las demás páginas se exponen en `pageTexts`/`fullText`
+    // para completar campos que en algunas variantes aparecen después
+    // (por ejemplo, la autorización en la página 2 del formato Pacar).
+    const pageTexts = result.items.map((pageItems) =>
+      normalizeExtractedText(buildPageLayout(pageItems)),
+    );
+    const layoutText = buildDocumentLayout(result.items.slice(0, 1));
+    const fullText = buildDocumentLayout(result.items);
 
-    if (!layoutText) {
+    if (!layoutText && !fullText) {
       throw new PdfExtractionError(
         "No se encontró texto extraíble en el PDF. El archivo podría estar escaneado o protegido.",
       );
@@ -129,6 +139,8 @@ export async function extractPdfText(
     return {
       text: layoutText,
       layoutText,
+      pageTexts,
+      fullText,
       pageCount: result.totalPages,
       hasText: true,
       items: result.items,

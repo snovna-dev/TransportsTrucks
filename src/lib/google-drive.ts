@@ -1,5 +1,6 @@
 import { google } from "googleapis";
 import { Readable } from "node:stream";
+import { DRIVE_SCOPES, getAuthorizedOAuthClient, isOAuthConfigured } from "./google-oauth";
 
 function getRequiredEnv(name: string): string {
   const value = process.env[name];
@@ -9,7 +10,16 @@ function getRequiredEnv(name: string): string {
   return value;
 }
 
+/**
+ * Prioridad: OAuth con la cuenta personal (refresh token). Si no está
+ * configurado, se usa la cuenta de servicio, que solo funciona con una unidad
+ * compartida porque las cuentas de servicio no tienen cuota propia en Drive.
+ */
 function getDriveClient() {
+  if (isOAuthConfigured()) {
+    return google.drive({ version: "v3", auth: getAuthorizedOAuthClient() });
+  }
+
   const clientEmail = getRequiredEnv("GOOGLE_SERVICE_ACCOUNT_EMAIL");
   const privateKey = getRequiredEnv("GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY").replace(/\\n/g, "\n");
 
@@ -18,7 +28,7 @@ function getDriveClient() {
       client_email: clientEmail,
       private_key: privateKey,
     },
-    scopes: ["https://www.googleapis.com/auth/drive.file"],
+    scopes: DRIVE_SCOPES,
   });
 
   return google.drive({ version: "v3", auth });
@@ -59,4 +69,13 @@ export async function uploadPdfToDrive(input: {
     id,
     webViewLink: response.data.webViewLink ?? null,
   };
+}
+
+export async function downloadPdfFromDrive(fileId: string): Promise<Buffer> {
+  const drive = getDriveClient();
+  const response = await drive.files.get(
+    { fileId, alt: "media", supportsAllDrives: true },
+    { responseType: "arraybuffer" },
+  );
+  return Buffer.from(response.data as ArrayBuffer);
 }

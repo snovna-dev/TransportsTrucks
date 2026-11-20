@@ -1,6 +1,5 @@
 import { extractPdfText } from "../lib/manifiestos_parser/pdf";
 import {
-  getFieldsForReview,
   parseManifestText,
   summarizeConfidence,
 } from "../lib/manifiestos_parser/manifest-parser";
@@ -8,6 +7,12 @@ import {
   getConfidenceAction,
   ManifestExtractionSchema,
 } from "../schemas/manifest-extraction.schema";
+import {
+  FIELD_CONFIDENCE_OK,
+  FIELD_DEFINITIONS,
+  getFieldLabel,
+  type FieldRequirement,
+} from "../lib/manifest-fields";
 import type {
   ExtractedField,
   ManifestExtraction,
@@ -20,17 +25,17 @@ export type ExtractionAction =
 
 export interface ExtractionReviewField {
   path: string;
+  label: string;
   value: unknown;
   confidence: number;
   section: string;
+  requirement: FieldRequirement;
+  reason: "MISSING" | "LOW_CONFIDENCE";
+  /** true = impide guardar automáticamente; debe revisarse. */
   required: boolean;
 }
 
-export interface ExtractionServiceResult {
-  extraction: ManifestExtraction;
-  rawText: string;
-  pageCount: number;
-  hasText: boolean;
+export interface ExtractionEvaluation {
   overallConfidence: number;
   action: ExtractionAction;
   summary: ReturnType<typeof summarizeConfidence>;
@@ -38,92 +43,99 @@ export interface ExtractionServiceResult {
   blockingReviewFields: ExtractionReviewField[];
 }
 
-/**
- * Fields that are needed to identify and persist a manifest safely.
- * Missing optional information (for example intermediate city or phone)
- * does not block automatic persistence.
- */
-const REQUIRED_FIELDS = new Set([
-  "company.nit",
-  "company.name",
-  "manifest.manifestNumber",
-  "manifest.authorizationNumber",
-  "manifest.issueDate",
-  "manifest.manifestType",
-  "manifest.origin",
-  "manifest.destination",
-  "manifestHolder.identificationNumber",
-  "manifestHolder.fullName",
-  "driver.identificationNumber",
-  "driver.fullName",
-  "driver.licenseCategory",
-  "vehicle.plate",
-  "vehicle.brand",
-  "vehicle.semiTrailerPlate",
-  "vehicle.configuration",
-  "vehicle.emptyWeight",
-  "vehicle.soatPolicyNumber",
-  "vehicle.soatInsuranceCompany",
-  "vehicle.soatExpirationDate",
-  "vehicleHolder.identificationNumber",
-  "vehicleHolder.fullName",
-  "sender.identificationNumber",
-  "sender.name",
-  "recipient.identificationNumber",
-  "recipient.name",
-  "cargo.remittanceNumber",
-  "cargo.measurementUnit",
-  "cargo.quantity",
-  "cargo.nature",
-  "cargo.packaging",
-  "cargo.productCode",
-  "cargo.transportedProduct",
-]);
+export interface ExtractionServiceResult extends ExtractionEvaluation {
+  extraction: ManifestExtraction;
+  /** Texto de todas las páginas (lo que se guarda en ManifestJob.rawText). */
+  rawText: string;
+  pageCount: number;
+  hasText: boolean;
+}
 
-function collectFields(
-  value: unknown,
-  path = "",
-  result: Array<{ path: string; field: ExtractedField<unknown> }> = [],
+/** Campos sin los cuales no se puede guardar el Manifest. */
+export function getRequiredExtractionFields() {
+  return FIELD_DEFINITIONS.filter((field) => field.requirement === "MUST_HAVE").map(
+    (field) => field.path,
+  );
+}
+
+export function getExtractedField(
+  extraction: ManifestExtraction,
+  path: string,
+): ExtractedField<unknown> | undefined {
+  const [group, key] = path.split(".");
+  const container = (extraction as unknown as Record<string, Record<string, ExtractedField<unknown>>>)[group];
+  return container?.[key];
+}
+
+export function setExtractedField(
+  extraction: ManifestExtraction,
+  path: string,
+  field: ExtractedField<unknown>,
 ) {
-  if (!value || typeof value !== "object") return result;
+  const [group, key] = path.split(".");
+  const container = (extraction as unknown as Record<string, Record<string, ExtractedField<unknown>>>)[group];
+  if (!container || !(key in container)) {
+    throw new Error(`Campo desconocido: ${path}`);
+  }
+  container[key] = field;
+}
 
-  if (
-    "value" in value &&
-    "confidence" in value &&
-    "section" in value
-  ) {
-    result.push({
-      path,
-      field: value as ExtractedField<unknown>,
+function isBlocking(requirement: FieldRequirement, field: ExtractedField<unknown>) {
+  if (field.confidence > FIELD_CONFIDENCE_OK) return false;
+  if (requirement === "MUST_HAVE" || requirement === "EXPECTED") return true;
+  if (requirement === "OPTIONAL_CHECKED") return field.value !== null;
+  return false;
+}
+
+/**
+ * Calcula la confianza global y los campos a revisar.
+ *
+ * - La confianza global es la mínima entre los campos obligatorios/esperados
+ *   y los opcionales verificables que sí vinieron en el PDF.
+ * - Un campo opcional ausente (p. ej. semirremolque o SOAT en algunas
+ *   variantes) no bloquea el guardado.
+ */
+export function evaluateExtraction(extraction: ManifestExtraction): ExtractionEvaluation {
+  const reviewFields: ExtractionReviewField[] = [];
+  const confidences: number[] = [];
+
+  for (const definition of FIELD_DEFINITIONS) {
+    const field = getExtractedField(extraction, definition.path);
+    if (!field) continue;
+
+    const counts =
+      definition.requirement === "MUST_HAVE" ||
+      definition.requirement === "EXPECTED" ||
+      (definition.requirement === "OPTIONAL_CHECKED" && field.value !== null);
+    if (counts) confidences.push(field.confidence);
+
+    if (field.confidence > FIELD_CONFIDENCE_OK) continue;
+
+    const blocking = isBlocking(definition.requirement, field);
+    // Los opcionales ausentes no aportan nada a la revisión.
+    if (!blocking && field.value === null) continue;
+
+    reviewFields.push({
+      path: definition.path,
+      label: getFieldLabel(definition.path),
+      value: field.value,
+      confidence: field.confidence,
+      section: field.section,
+      requirement: definition.requirement,
+      reason: field.value === null ? "MISSING" : "LOW_CONFIDENCE",
+      required: blocking,
     });
-    return result;
   }
 
-  Object.entries(value).forEach(([key, child]) => {
-    collectFields(child, path ? `${path}.${key}` : key, result);
-  });
+  const overallConfidence = confidences.length ? Math.min(...confidences) : 0;
 
-  return result;
-}
-
-function calculateOverallConfidence(extraction: ManifestExtraction): number {
-  const fields = collectFields(extraction);
-  const required = fields.filter(({ path }) => REQUIRED_FIELDS.has(path));
-
-  if (required.length === 0) return 0;
-
-  return Math.min(...required.map(({ field }) => field.confidence));
-}
-
-function toReviewFields(extraction: ManifestExtraction): ExtractionReviewField[] {
-  return getFieldsForReview(extraction).map((field) => ({
-    ...field,
-    required: REQUIRED_FIELDS.has(field.path),
-  }));
-}
-
-export function getRequiredExtractionFields() {
-  return [...REQUIRED_FIELDS];
+  return {
+    overallConfidence,
+    action: getConfidenceAction(overallConfidence),
+    summary: summarizeConfidence(extraction),
+    reviewFields,
+    blockingReviewFields: reviewFields.filter((field) => field.required),
+  };
 }
 
 export function validateExtraction(
@@ -132,37 +144,57 @@ export function validateExtraction(
   return ManifestExtractionSchema.parse(extraction);
 }
 
+const AUTHORIZATION_PATTERN =
+  /AUTORIZACI[OÓ]N\s*(?:N[O°º]\.?|#)?\s*:?\s*([0-9][0-9 ]{4,}[0-9])/i;
+
+/**
+ * Algunas variantes (p. ej. Pacar) traen la autorización fuera de la página 1.
+ * Si el parser no la encontró, se busca en las demás páginas. Nunca se inventa:
+ * si aparece, se marca con confianza 0.9 para que el usuario la confirme.
+ */
+function completeFromOtherPages(extraction: ManifestExtraction, pageTexts: string[]) {
+  const authorization = extraction.manifest.authorizationNumber;
+  if (authorization.value !== null) return;
+
+  for (const [index, text] of pageTexts.entries()) {
+    if (index === 0) continue;
+    const match = AUTHORIZATION_PATTERN.exec(text);
+    if (match) {
+      extraction.manifest.authorizationNumber = {
+        value: match[1].replace(/\s+/g, ""),
+        confidence: 0.9,
+        source: "PDF_TEXT",
+        section: authorization.section,
+        matchedLabel: `Autorización (página ${index + 1})`,
+      };
+      return;
+    }
+  }
+}
+
 export async function extractManifestFromPdf(
   input: Buffer | Uint8Array,
 ): Promise<ExtractionServiceResult> {
   const pdf = await extractPdfText(input);
 
+  let extraction: ManifestExtraction;
   try {
-    const extraction = validateExtraction(parseManifestText(pdf.text));
-    const overallConfidence = calculateOverallConfidence(extraction);
-    const action = getConfidenceAction(overallConfidence);
-    const summary = summarizeConfidence(extraction);
-    const reviewFields = toReviewFields(extraction);
-    const blockingReviewFields = reviewFields.filter(
-      (field) => field.required,
-    );
-
-    return {
-      extraction,
-      rawText: pdf.text,
-      pageCount: pdf.pageCount,
-      hasText: pdf.hasText,
-      overallConfidence,
-      action,
-      summary,
-      reviewFields,
-      blockingReviewFields,
-    };
+    extraction = validateExtraction(parseManifestText(pdf.text));
   } catch (error) {
     throw new Error("No fue posible validar la extracción del manifiesto.", {
       cause: error,
     });
   }
+
+  completeFromOtherPages(extraction, pdf.pageTexts);
+
+  return {
+    extraction,
+    rawText: pdf.fullText,
+    pageCount: pdf.pageCount,
+    hasText: pdf.hasText,
+    ...evaluateExtraction(extraction),
+  };
 }
 
 export async function extractManifestFromPdfFile(
@@ -172,3 +204,4 @@ export async function extractManifestFromPdfFile(
   const buffer = await readFile(filePath);
   return extractManifestFromPdf(buffer);
 }
+

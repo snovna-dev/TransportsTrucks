@@ -16,10 +16,10 @@
  */
 
 import * as runtime from "@prisma/client/runtime/client"
-import type * as Prisma from "../models.js"
-import { type PrismaClient } from "./class.js"
+import type * as Prisma from "../models"
+import { type PrismaClient } from "./class"
 
-export type * from '../models.js'
+export type * from '../models'
 
 export type DMMF = typeof runtime.DMMF
 
@@ -406,7 +406,8 @@ export const ModelName = {
   Manifest: 'Manifest',
   Cargo: 'Cargo',
   ManifestProcessing: 'ManifestProcessing',
-  ManifestJob: 'ManifestJob'
+  ManifestJob: 'ManifestJob',
+  ManifestFieldCorrection: 'ManifestFieldCorrection'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -422,7 +423,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "company" | "driver" | "vehicleHolder" | "manifestHolder" | "vehicle" | "personOrCompany" | "manifest" | "cargo" | "manifestProcessing" | "manifestJob"
+    modelProps: "company" | "driver" | "vehicleHolder" | "manifestHolder" | "vehicle" | "personOrCompany" | "manifest" | "cargo" | "manifestProcessing" | "manifestJob" | "manifestFieldCorrection"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1166,6 +1167,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ManifestFieldCorrection: {
+      payload: Prisma.$ManifestFieldCorrectionPayload<ExtArgs>
+      fields: Prisma.ManifestFieldCorrectionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ManifestFieldCorrectionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ManifestFieldCorrectionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ManifestFieldCorrectionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ManifestFieldCorrectionPayload>
+        }
+        findFirst: {
+          args: Prisma.ManifestFieldCorrectionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ManifestFieldCorrectionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ManifestFieldCorrectionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ManifestFieldCorrectionPayload>
+        }
+        findMany: {
+          args: Prisma.ManifestFieldCorrectionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ManifestFieldCorrectionPayload>[]
+        }
+        create: {
+          args: Prisma.ManifestFieldCorrectionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ManifestFieldCorrectionPayload>
+        }
+        createMany: {
+          args: Prisma.ManifestFieldCorrectionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ManifestFieldCorrectionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ManifestFieldCorrectionPayload>[]
+        }
+        delete: {
+          args: Prisma.ManifestFieldCorrectionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ManifestFieldCorrectionPayload>
+        }
+        update: {
+          args: Prisma.ManifestFieldCorrectionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ManifestFieldCorrectionPayload>
+        }
+        deleteMany: {
+          args: Prisma.ManifestFieldCorrectionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ManifestFieldCorrectionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ManifestFieldCorrectionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ManifestFieldCorrectionPayload>[]
+        }
+        upsert: {
+          args: Prisma.ManifestFieldCorrectionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ManifestFieldCorrectionPayload>
+        }
+        aggregate: {
+          args: Prisma.ManifestFieldCorrectionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateManifestFieldCorrection>
+        }
+        groupBy: {
+          args: Prisma.ManifestFieldCorrectionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ManifestFieldCorrectionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ManifestFieldCorrectionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ManifestFieldCorrectionCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1376,6 +1451,10 @@ export const ManifestJobScalarFieldEnum = {
   fileHash: 'fileHash',
   driveFileId: 'driveFileId',
   driveFileUrl: 'driveFileUrl',
+  storageProvider: 'storageProvider',
+  storageKey: 'storageKey',
+  fileSize: 'fileSize',
+  pdfData: 'pdfData',
   rawText: 'rawText',
   extractedJson: 'extractedJson',
   overallConfidence: 'overallConfidence',
@@ -1386,10 +1465,26 @@ export const ManifestJobScalarFieldEnum = {
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   startedAt: 'startedAt',
-  completedAt: 'completedAt'
+  completedAt: 'completedAt',
+  reviewedAt: 'reviewedAt'
 } as const
 
 export type ManifestJobScalarFieldEnum = (typeof ManifestJobScalarFieldEnum)[keyof typeof ManifestJobScalarFieldEnum]
+
+
+export const ManifestFieldCorrectionScalarFieldEnum = {
+  id: 'id',
+  jobId: 'jobId',
+  manifestId: 'manifestId',
+  fieldPath: 'fieldPath',
+  originalValue: 'originalValue',
+  correctedValue: 'correctedValue',
+  originalConfidence: 'originalConfidence',
+  source: 'source',
+  createdAt: 'createdAt'
+} as const
+
+export type ManifestFieldCorrectionScalarFieldEnum = (typeof ManifestFieldCorrectionScalarFieldEnum)[keyof typeof ManifestFieldCorrectionScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1548,6 +1643,20 @@ export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'In
  * Reference to a field of type 'Int[]'
  */
 export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Bytes'
+ */
+export type BytesFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Bytes'>
+    
+
+
+/**
+ * Reference to a field of type 'Bytes[]'
+ */
+export type ListBytesFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Bytes[]'>
     
 
 
@@ -1739,6 +1848,7 @@ export type GlobalOmitConfig = {
   cargo?: Prisma.CargoOmit
   manifestProcessing?: Prisma.ManifestProcessingOmit
   manifestJob?: Prisma.ManifestJobOmit
+  manifestFieldCorrection?: Prisma.ManifestFieldCorrectionOmit
 }
 
 /* Types for Logging */

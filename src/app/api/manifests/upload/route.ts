@@ -1,12 +1,29 @@
-import { NextResponse } from "next/server";
 import { createHash } from "node:crypto";
-import { createManifestJob, markManifestJobError, markManifestJobQueued, updateManifestJobStorage } from "../../../../services/manifest-job.service";
-import { uploadPdfToDrive } from "../../../../lib/google-drive";
+import { errorResponse, jsonResponse } from "../../../../lib/api";
+import { savePdf } from "../../../../lib/storage";
 import { publishManifestJob } from "../../../../lib/pubsub";
+import {
+  createManifestJob,
+  getProcessingMode,
+  markManifestJobError,
+  markManifestJobQueued,
+  updateManifestJobStorage,
+} from "../../../../services/manifest-job.service";
+import { processManifestJob } from "../../../../services/processing.service";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+// En Netlify el tiempo máximo real lo define la plataforma (10 s por defecto, hasta 26 s).
+export const maxDuration = 26;
 
-const MAX_FILE_SIZE = 20 * 1024 * 1024;
+/**
+ * Netlify limita el cuerpo de una petición a ~6 MB (≈4.5 MB de archivo tras
+ * la codificación). Por eso el límite por defecto es 4 MB.
+ */
+function maxFileSize() {
+  const megabytes = Number(process.env.MAX_UPLOAD_MB ?? 4);
+  return (Number.isFinite(megabytes) && megabytes > 0 ? megabytes : 4) * 1024 * 1024;
+}
 
 function isPdf(buffer: Buffer): boolean {
   return buffer.subarray(0, 5).toString("ascii") === "%PDF-";
@@ -20,111 +37,94 @@ export async function POST(request: Request) {
     const file = formData.get("file");
 
     if (!(file instanceof File)) {
-      return NextResponse.json(
-        { success: false, error: "Debe seleccionar un archivo PDF." },
-        { status: 400 },
-      );
+      return errorResponse("Debe seleccionar un archivo PDF.", 400);
     }
-
     if (file.size === 0) {
-      return NextResponse.json(
-        { success: false, error: "El archivo está vacío." },
-        { status: 400 },
-      );
+      return errorResponse("El archivo está vacío.", 400);
     }
-
-    if (file.size > MAX_FILE_SIZE) {
-      return NextResponse.json(
-        { success: false, error: "El PDF supera el límite de 20 MB." },
-        { status: 413 },
-      );
+    const limit = maxFileSize();
+    if (file.size > limit) {
+      return errorResponse(`El PDF supera el límite de ${Math.round(limit / 1024 / 1024)} MB.`, 413);
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
-
     if (!isPdf(buffer)) {
-      return NextResponse.json(
-        { success: false, error: "El archivo no tiene una firma PDF válida." },
-        { status: 400 },
-      );
+      return errorResponse("El archivo no tiene una firma PDF válida.", 400);
     }
 
     const fileHash = createHash("sha256").update(buffer).digest("hex");
     const job = await createManifestJob({
       originalFileName: file.name,
       fileHash,
+      fileSize: file.size,
     });
-
     jobId = job.id;
 
-    // El hash es la barrera de idempotencia: si ya existe, no volvemos a subir
-    // el archivo ni publicamos otro mensaje para el mismo documento.
+    // El hash es la barrera de idempotencia: el mismo PDF no se procesa dos veces.
     if (!job.created) {
-      return NextResponse.json(
-        {
-          success: true,
-          duplicate: true,
-          jobId: job.id.toString(),
-          status: job.status,
-          message: "El PDF ya había sido cargado anteriormente.",
-        },
-        { status: 200 },
-      );
+      return jsonResponse({
+        success: true,
+        duplicate: true,
+        jobId: job.id,
+        status: job.status,
+        manifestId: job.manifestId,
+        message: "Este PDF ya había sido cargado anteriormente.",
+      });
     }
 
     try {
-      // Si el job ya tenía un archivo en Drive (por ejemplo, falló Pub/Sub),
-      // lo reutilizamos y evitamos crear una segunda copia.
-      let driveFile = job.driveFileId
-        ? {
-            id: job.driveFileId,
-            webViewLink: job.driveFileUrl,
-          }
-        : null;
-
-      if (!driveFile) {
-        driveFile = await uploadPdfToDrive({
-          fileName: file.name,
-          buffer,
-        });
-
-        await updateManifestJobStorage(job.id, {
-          driveFileId: driveFile.id,
-          driveFileUrl: driveFile.webViewLink,
-        });
+      // Si un intento anterior ya guardó el archivo, se reutiliza.
+      if (!job.storageProvider) {
+        const stored = await savePdf({ jobId: job.id, fileName: file.name, fileHash, buffer });
+        await updateManifestJobStorage(job.id, stored);
       }
-
       await markManifestJobQueued(job.id);
-      const messageId = await publishManifestJob(job.id);
-
-      return NextResponse.json(
-        {
-          success: true,
-          duplicate: false,
-          jobId: job.id.toString(),
-          status: "QUEUED",
-          driveFileId: driveFile.id,
-          messageId,
-        },
-        { status: 201 },
-      );
     } catch (error) {
       await markManifestJobError(
         job.id,
-        error instanceof Error ? error.message : "Error desconocido durante el cargue.",
+        error instanceof Error ? error.message : "Error desconocido al guardar el PDF.",
       );
       throw error;
     }
+
+    if (getProcessingMode() === "pubsub") {
+      try {
+        const messageId = await publishManifestJob(job.id);
+        return jsonResponse(
+          { success: true, duplicate: false, jobId: job.id, status: "QUEUED", messageId },
+          { status: 202 },
+        );
+      } catch (error) {
+        await markManifestJobError(
+          job.id,
+          error instanceof Error ? error.message : "No fue posible publicar en Pub/Sub.",
+        );
+        throw error;
+      }
+    }
+
+    // Modo por defecto: con ~8 manifiestos al mes se procesa en la misma petición.
+    const result = await processManifestJob(job.id);
+
+    return jsonResponse(
+      {
+        success: result.status !== "ERROR",
+        duplicate: false,
+        jobId: job.id,
+        status: result.status,
+        manifestId: result.manifestId,
+        overallConfidence: result.overallConfidence,
+        blockingFields: result.blockingFields,
+        error: result.error,
+      },
+      { status: result.status === "ERROR" ? 500 : 201 },
+    );
   } catch (error) {
     console.error("POST /api/manifests/upload", error);
-
-    return NextResponse.json(
-      {
-        success: false,
-        jobId: jobId?.toString() ?? null,
-        error: error instanceof Error ? error.message : "No fue posible cargar el PDF.",
-      },
-      { status: 500 },
+    return errorResponse(
+      error instanceof Error ? error.message : "No fue posible cargar el PDF.",
+      500,
+      { jobId: jobId?.toString() ?? null },
     );
   }
 }

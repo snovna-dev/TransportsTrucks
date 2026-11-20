@@ -1,4 +1,5 @@
-export type ConfidenceSource = "PDF_TEXT";
+/** PDF_TEXT: extraído del PDF. USER: corregido o confirmado en la revisión manual. */
+export type ConfidenceSource = "PDF_TEXT" | "USER";
 
 export interface ExtractedField<T> {
   value: T | null;

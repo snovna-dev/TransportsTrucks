@@ -17,8 +17,8 @@
 
 import * as runtime from "@prisma/client/runtime/index-browser"
 
-export type * from '../models.js'
-export type * from './prismaNamespace.js'
+export type * from '../models'
+export type * from './prismaNamespace'
 
 export const Decimal = runtime.Decimal
 
@@ -60,7 +60,8 @@ export const ModelName = {
   Manifest: 'Manifest',
   Cargo: 'Cargo',
   ManifestProcessing: 'ManifestProcessing',
-  ManifestJob: 'ManifestJob'
+  ManifestJob: 'ManifestJob',
+  ManifestFieldCorrection: 'ManifestFieldCorrection'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -250,6 +251,10 @@ export const ManifestJobScalarFieldEnum = {
   fileHash: 'fileHash',
   driveFileId: 'driveFileId',
   driveFileUrl: 'driveFileUrl',
+  storageProvider: 'storageProvider',
+  storageKey: 'storageKey',
+  fileSize: 'fileSize',
+  pdfData: 'pdfData',
   rawText: 'rawText',
   extractedJson: 'extractedJson',
   overallConfidence: 'overallConfidence',
@@ -260,10 +265,26 @@ export const ManifestJobScalarFieldEnum = {
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   startedAt: 'startedAt',
-  completedAt: 'completedAt'
+  completedAt: 'completedAt',
+  reviewedAt: 'reviewedAt'
 } as const
 
 export type ManifestJobScalarFieldEnum = (typeof ManifestJobScalarFieldEnum)[keyof typeof ManifestJobScalarFieldEnum]
+
+
+export const ManifestFieldCorrectionScalarFieldEnum = {
+  id: 'id',
+  jobId: 'jobId',
+  manifestId: 'manifestId',
+  fieldPath: 'fieldPath',
+  originalValue: 'originalValue',
+  correctedValue: 'correctedValue',
+  originalConfidence: 'originalConfidence',
+  source: 'source',
+  createdAt: 'createdAt'
+} as const
+
+export type ManifestFieldCorrectionScalarFieldEnum = (typeof ManifestFieldCorrectionScalarFieldEnum)[keyof typeof ManifestFieldCorrectionScalarFieldEnum]
 
 
 export const SortOrder = {

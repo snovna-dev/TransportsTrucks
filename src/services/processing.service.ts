@@ -1,76 +1,188 @@
-import { extractManifestFromPdf } from "./extraction.service";
-import { persistManifest } from "./manifest.service";
+import { prisma } from "../lib/prisma";
+import { readPdf } from "../lib/storage";
+import { ManifestJobStatus } from "../generated/prisma/enums";
+import { extractManifestFromPdf, type ExtractionAction } from "./extraction.service";
+import { ManifestValidationError, persistManifest } from "./manifest.service";
+import { markManifestJobError, STALE_PROCESSING_MS } from "./manifest-job.service";
+import { toStoredExtraction } from "./stored-extraction";
 
-export interface ProcessManifestInput {
-    fileName: string;
-    fileHash?: string | null;
-    pdf: Buffer;
-}
-
-export interface ProcessManifestResult {
+export interface ProcessManifestJobResult {
+    jobId: bigint;
+    status: ManifestJobStatus;
     manifestId: bigint | null;
-    status: "COMPLETED" | "REVIEW_REQUIRED" | "ERROR";
-    action: string;
-    overallConfidence: number;
-    reviewRequired: boolean;
+    overallConfidence: number | null;
+    action: ExtractionAction | null;
+    blockingFields: number;
+    /** true si el job no se procesó porque ya estaba en otro estado (idempotencia). */
+    skipped: boolean;
+    error?: string;
 }
 
-export async function processManifest(
-    input: ProcessManifestInput,
-): Promise<ProcessManifestResult> {
-    try {
-        console.log("=== INICIANDO PROCESAMIENTO ===");
+export function manifestPdfUrl(jobId: bigint) {
+    return `/api/manifest-jobs/${jobId}/pdf`;
+}
 
-        const extractionResult = await extractManifestFromPdf(input.pdf);
+/**
+ * Procesa un job de punta a punta: lee el PDF del almacenamiento, extrae los
+ * datos y, según la confianza, guarda el Manifest (COMPLETED) o deja el job en
+ * REVIEW_REQUIRED con rawText / extractedJson / overallConfidence.
+ *
+ * Es idempotente: reclama el job de forma atómica, así que dos llamadas
+ * simultáneas (p. ej. un reintento de Pub/Sub) no lo procesan dos veces.
+ */
+export async function processManifestJob(
+    jobId: bigint,
+    options: { force?: boolean } = {},
+): Promise<ProcessManifestJobResult> {
+    const now = new Date();
+    const claimable: ManifestJobStatus[] = [
+        ManifestJobStatus.UPLOADED,
+        ManifestJobStatus.QUEUED,
+        ManifestJobStatus.ERROR,
+    ];
+    if (options.force) claimable.push(ManifestJobStatus.REVIEW_REQUIRED);
 
-        console.log(
-        `Confianza global: ${extractionResult.overallConfidence.toFixed(2)}`,
-        );
-        console.log(`Acción: ${extractionResult.action}`);
-        console.log(
-        `Campos bloqueantes: ${extractionResult.blockingReviewFields.length}`,
-        );
+    const claim = await prisma.manifestJob.updateMany({
+        where: {
+            id: jobId,
+            OR: [
+                { status: { in: claimable } },
+                {
+                    status: ManifestJobStatus.PROCESSING,
+                    startedAt: { lt: new Date(now.getTime() - STALE_PROCESSING_MS) },
+                },
+            ],
+        },
+        data: {
+            status: ManifestJobStatus.PROCESSING,
+            attempts: { increment: 1 },
+            startedAt: now,
+            completedAt: null,
+            errorMessage: null,
+            updatedAt: now,
+        },
+    });
 
-        if (extractionResult.blockingReviewFields.length > 0) {
+    const job = await prisma.manifestJob.findUnique({
+        where: { id: jobId },
+        select: {
+            id: true,
+            status: true,
+            manifestId: true,
+            overallConfidence: true,
+            originalFileName: true,
+            fileHash: true,
+            storageProvider: true,
+            storageKey: true,
+            driveFileId: true,
+        },
+    });
+
+    if (!job) throw new Error(`No existe el job ${jobId}.`);
+
+    if (claim.count === 0) {
         return {
-            manifestId: null,
-            status: "REVIEW_REQUIRED",
-            action: extractionResult.action,
-            overallConfidence: extractionResult.overallConfidence,
-            reviewRequired: true,
+            jobId,
+            status: job.status,
+            manifestId: job.manifestId,
+            overallConfidence: job.overallConfidence ? Number(job.overallConfidence) : null,
+            action: null,
+            blockingFields: 0,
+            skipped: true,
         };
+    }
+
+    let action: ExtractionAction | null = null;
+    let overallConfidence: number | null = null;
+
+    try {
+        const pdf = await readPdf(job);
+        const result = await extractManifestFromPdf(pdf);
+        action = result.action;
+        overallConfidence = result.overallConfidence;
+
+        await prisma.manifestJob.update({
+            where: { id: jobId },
+            data: {
+                rawText: result.rawText,
+                extractedJson: toStoredExtraction(result) as object,
+                overallConfidence: result.overallConfidence,
+                updatedAt: new Date(),
+            },
+        });
+
+        if (result.blockingReviewFields.length > 0) {
+            await markReviewRequired(jobId, null);
+            return {
+                jobId,
+                status: ManifestJobStatus.REVIEW_REQUIRED,
+                manifestId: null,
+                overallConfidence,
+                action,
+                blockingFields: result.blockingReviewFields.length,
+                skipped: false,
+            };
         }
 
-        /*
-        * IMPORTANTE:
-        * manifest.service.ts espera `extractionResult`,
-        * no `extraction`.
-        */
         const persisted = await persistManifest({
-        extractionResult,
-        pdfFileName: input.fileName,
-        pdfFileHash: input.fileHash ?? null,
+            extractionResult: result,
+            pdfFileName: job.originalFileName,
+            pdfFileHash: job.fileHash,
+            pdfFileUrl: manifestPdfUrl(jobId),
+            jobId,
         });
 
         return {
-        manifestId: persisted.manifestId,
-        status:
-            persisted.status === "COMPLETED"
-            ? "COMPLETED"
-            : "REVIEW_REQUIRED",
-        action: extractionResult.action,
-        overallConfidence: persisted.overallConfidence,
-        reviewRequired: persisted.reviewStatus !== "APPROVED",
+            jobId,
+            status: ManifestJobStatus.COMPLETED,
+            manifestId: persisted.manifestId,
+            overallConfidence,
+            action,
+            blockingFields: 0,
+            skipped: false,
         };
     } catch (error) {
-        console.error("Error procesando manifiesto:", error);
+        const message = error instanceof Error ? error.message : "Error desconocido al procesar el PDF.";
+        console.error(`processManifestJob(${jobId})`, error);
 
+        // Si la extracción salió pero no se pudo guardar por una validación de
+        // negocio (p. ej. conflicto de unicidad), el usuario lo resuelve en la revisión.
+        if (error instanceof ManifestValidationError && action !== null) {
+            await markReviewRequired(jobId, message);
+            return {
+                jobId,
+                status: ManifestJobStatus.REVIEW_REQUIRED,
+                manifestId: null,
+                overallConfidence,
+                action,
+                blockingFields: 0,
+                skipped: false,
+                error: message,
+            };
+        }
+
+        await markManifestJobError(jobId, message);
         return {
-        manifestId: null,
-        status: "ERROR",
-        action: "ERROR",
-        overallConfidence: 0,
-        reviewRequired: true,
+            jobId,
+            status: ManifestJobStatus.ERROR,
+            manifestId: null,
+            overallConfidence,
+            action,
+            blockingFields: 0,
+            skipped: false,
+            error: message,
         };
     }
+}
+
+async function markReviewRequired(jobId: bigint, errorMessage: string | null) {
+    await prisma.manifestJob.update({
+        where: { id: jobId },
+        data: {
+            status: ManifestJobStatus.REVIEW_REQUIRED,
+            errorMessage,
+            completedAt: null,
+            updatedAt: new Date(),
+        },
+    });
 }

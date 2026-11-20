@@ -9,8 +9,8 @@
  * 🟢 You can import this file directly.
  */
 import type * as runtime from "@prisma/client/runtime/client"
-import type * as $Enums from "../enums.js"
-import type * as Prisma from "../internal/prismaNamespace.js"
+import type * as $Enums from "../enums"
+import type * as Prisma from "../internal/prismaNamespace"
 
 /**
  * Model ManifestJob
@@ -28,6 +28,7 @@ export type AggregateManifestJob = {
 
 export type ManifestJobAvgAggregateOutputType = {
   id: number | null
+  fileSize: number | null
   overallConfidence: runtime.Decimal | null
   manifestId: number | null
   attempts: number | null
@@ -35,6 +36,7 @@ export type ManifestJobAvgAggregateOutputType = {
 
 export type ManifestJobSumAggregateOutputType = {
   id: bigint | null
+  fileSize: number | null
   overallConfidence: runtime.Decimal | null
   manifestId: bigint | null
   attempts: number | null
@@ -46,6 +48,10 @@ export type ManifestJobMinAggregateOutputType = {
   fileHash: string | null
   driveFileId: string | null
   driveFileUrl: string | null
+  storageProvider: string | null
+  storageKey: string | null
+  fileSize: number | null
+  pdfData: runtime.Bytes | null
   rawText: string | null
   overallConfidence: runtime.Decimal | null
   manifestId: bigint | null
@@ -56,6 +62,7 @@ export type ManifestJobMinAggregateOutputType = {
   updatedAt: Date | null
   startedAt: Date | null
   completedAt: Date | null
+  reviewedAt: Date | null
 }
 
 export type ManifestJobMaxAggregateOutputType = {
@@ -64,6 +71,10 @@ export type ManifestJobMaxAggregateOutputType = {
   fileHash: string | null
   driveFileId: string | null
   driveFileUrl: string | null
+  storageProvider: string | null
+  storageKey: string | null
+  fileSize: number | null
+  pdfData: runtime.Bytes | null
   rawText: string | null
   overallConfidence: runtime.Decimal | null
   manifestId: bigint | null
@@ -74,6 +85,7 @@ export type ManifestJobMaxAggregateOutputType = {
   updatedAt: Date | null
   startedAt: Date | null
   completedAt: Date | null
+  reviewedAt: Date | null
 }
 
 export type ManifestJobCountAggregateOutputType = {
@@ -82,6 +94,10 @@ export type ManifestJobCountAggregateOutputType = {
   fileHash: number
   driveFileId: number
   driveFileUrl: number
+  storageProvider: number
+  storageKey: number
+  fileSize: number
+  pdfData: number
   rawText: number
   extractedJson: number
   overallConfidence: number
@@ -93,12 +109,14 @@ export type ManifestJobCountAggregateOutputType = {
   updatedAt: number
   startedAt: number
   completedAt: number
+  reviewedAt: number
   _all: number
 }
 
 
 export type ManifestJobAvgAggregateInputType = {
   id?: true
+  fileSize?: true
   overallConfidence?: true
   manifestId?: true
   attempts?: true
@@ -106,6 +124,7 @@ export type ManifestJobAvgAggregateInputType = {
 
 export type ManifestJobSumAggregateInputType = {
   id?: true
+  fileSize?: true
   overallConfidence?: true
   manifestId?: true
   attempts?: true
@@ -117,6 +136,10 @@ export type ManifestJobMinAggregateInputType = {
   fileHash?: true
   driveFileId?: true
   driveFileUrl?: true
+  storageProvider?: true
+  storageKey?: true
+  fileSize?: true
+  pdfData?: true
   rawText?: true
   overallConfidence?: true
   manifestId?: true
@@ -127,6 +150,7 @@ export type ManifestJobMinAggregateInputType = {
   updatedAt?: true
   startedAt?: true
   completedAt?: true
+  reviewedAt?: true
 }
 
 export type ManifestJobMaxAggregateInputType = {
@@ -135,6 +159,10 @@ export type ManifestJobMaxAggregateInputType = {
   fileHash?: true
   driveFileId?: true
   driveFileUrl?: true
+  storageProvider?: true
+  storageKey?: true
+  fileSize?: true
+  pdfData?: true
   rawText?: true
   overallConfidence?: true
   manifestId?: true
@@ -145,6 +173,7 @@ export type ManifestJobMaxAggregateInputType = {
   updatedAt?: true
   startedAt?: true
   completedAt?: true
+  reviewedAt?: true
 }
 
 export type ManifestJobCountAggregateInputType = {
@@ -153,6 +182,10 @@ export type ManifestJobCountAggregateInputType = {
   fileHash?: true
   driveFileId?: true
   driveFileUrl?: true
+  storageProvider?: true
+  storageKey?: true
+  fileSize?: true
+  pdfData?: true
   rawText?: true
   extractedJson?: true
   overallConfidence?: true
@@ -164,6 +197,7 @@ export type ManifestJobCountAggregateInputType = {
   updatedAt?: true
   startedAt?: true
   completedAt?: true
+  reviewedAt?: true
   _all?: true
 }
 
@@ -259,6 +293,10 @@ export type ManifestJobGroupByOutputType = {
   fileHash: string
   driveFileId: string | null
   driveFileUrl: string | null
+  storageProvider: string | null
+  storageKey: string | null
+  fileSize: number | null
+  pdfData: runtime.Bytes | null
   rawText: string | null
   extractedJson: runtime.JsonValue | null
   overallConfidence: runtime.Decimal | null
@@ -270,6 +308,7 @@ export type ManifestJobGroupByOutputType = {
   updatedAt: Date | null
   startedAt: Date | null
   completedAt: Date | null
+  reviewedAt: Date | null
   _count: ManifestJobCountAggregateOutputType | null
   _avg: ManifestJobAvgAggregateOutputType | null
   _sum: ManifestJobSumAggregateOutputType | null
@@ -301,6 +340,10 @@ export type ManifestJobWhereInput = {
   fileHash?: Prisma.StringFilter<"ManifestJob"> | string
   driveFileId?: Prisma.StringNullableFilter<"ManifestJob"> | string | null
   driveFileUrl?: Prisma.StringNullableFilter<"ManifestJob"> | string | null
+  storageProvider?: Prisma.StringNullableFilter<"ManifestJob"> | string | null
+  storageKey?: Prisma.StringNullableFilter<"ManifestJob"> | string | null
+  fileSize?: Prisma.IntNullableFilter<"ManifestJob"> | number | null
+  pdfData?: Prisma.BytesNullableFilter<"ManifestJob"> | runtime.Bytes | null
   rawText?: Prisma.StringNullableFilter<"ManifestJob"> | string | null
   extractedJson?: Prisma.JsonNullableFilter<"ManifestJob">
   overallConfidence?: Prisma.DecimalNullableFilter<"ManifestJob"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -312,7 +355,9 @@ export type ManifestJobWhereInput = {
   updatedAt?: Prisma.DateTimeNullableFilter<"ManifestJob"> | Date | string | null
   startedAt?: Prisma.DateTimeNullableFilter<"ManifestJob"> | Date | string | null
   completedAt?: Prisma.DateTimeNullableFilter<"ManifestJob"> | Date | string | null
+  reviewedAt?: Prisma.DateTimeNullableFilter<"ManifestJob"> | Date | string | null
   manifest?: Prisma.XOR<Prisma.ManifestNullableScalarRelationFilter, Prisma.ManifestWhereInput> | null
+  corrections?: Prisma.ManifestFieldCorrectionListRelationFilter
 }
 
 export type ManifestJobOrderByWithRelationInput = {
@@ -321,6 +366,10 @@ export type ManifestJobOrderByWithRelationInput = {
   fileHash?: Prisma.SortOrder
   driveFileId?: Prisma.SortOrderInput | Prisma.SortOrder
   driveFileUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  storageProvider?: Prisma.SortOrderInput | Prisma.SortOrder
+  storageKey?: Prisma.SortOrderInput | Prisma.SortOrder
+  fileSize?: Prisma.SortOrderInput | Prisma.SortOrder
+  pdfData?: Prisma.SortOrderInput | Prisma.SortOrder
   rawText?: Prisma.SortOrderInput | Prisma.SortOrder
   extractedJson?: Prisma.SortOrderInput | Prisma.SortOrder
   overallConfidence?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -332,7 +381,9 @@ export type ManifestJobOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   startedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  reviewedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   manifest?: Prisma.ManifestOrderByWithRelationInput
+  corrections?: Prisma.ManifestFieldCorrectionOrderByRelationAggregateInput
 }
 
 export type ManifestJobWhereUniqueInput = Prisma.AtLeast<{
@@ -344,6 +395,10 @@ export type ManifestJobWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.ManifestJobWhereInput | Prisma.ManifestJobWhereInput[]
   originalFileName?: Prisma.StringFilter<"ManifestJob"> | string
   driveFileUrl?: Prisma.StringNullableFilter<"ManifestJob"> | string | null
+  storageProvider?: Prisma.StringNullableFilter<"ManifestJob"> | string | null
+  storageKey?: Prisma.StringNullableFilter<"ManifestJob"> | string | null
+  fileSize?: Prisma.IntNullableFilter<"ManifestJob"> | number | null
+  pdfData?: Prisma.BytesNullableFilter<"ManifestJob"> | runtime.Bytes | null
   rawText?: Prisma.StringNullableFilter<"ManifestJob"> | string | null
   extractedJson?: Prisma.JsonNullableFilter<"ManifestJob">
   overallConfidence?: Prisma.DecimalNullableFilter<"ManifestJob"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -355,7 +410,9 @@ export type ManifestJobWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeNullableFilter<"ManifestJob"> | Date | string | null
   startedAt?: Prisma.DateTimeNullableFilter<"ManifestJob"> | Date | string | null
   completedAt?: Prisma.DateTimeNullableFilter<"ManifestJob"> | Date | string | null
+  reviewedAt?: Prisma.DateTimeNullableFilter<"ManifestJob"> | Date | string | null
   manifest?: Prisma.XOR<Prisma.ManifestNullableScalarRelationFilter, Prisma.ManifestWhereInput> | null
+  corrections?: Prisma.ManifestFieldCorrectionListRelationFilter
 }, "id" | "fileHash" | "driveFileId">
 
 export type ManifestJobOrderByWithAggregationInput = {
@@ -364,6 +421,10 @@ export type ManifestJobOrderByWithAggregationInput = {
   fileHash?: Prisma.SortOrder
   driveFileId?: Prisma.SortOrderInput | Prisma.SortOrder
   driveFileUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  storageProvider?: Prisma.SortOrderInput | Prisma.SortOrder
+  storageKey?: Prisma.SortOrderInput | Prisma.SortOrder
+  fileSize?: Prisma.SortOrderInput | Prisma.SortOrder
+  pdfData?: Prisma.SortOrderInput | Prisma.SortOrder
   rawText?: Prisma.SortOrderInput | Prisma.SortOrder
   extractedJson?: Prisma.SortOrderInput | Prisma.SortOrder
   overallConfidence?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -375,6 +436,7 @@ export type ManifestJobOrderByWithAggregationInput = {
   updatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   startedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  reviewedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.ManifestJobCountOrderByAggregateInput
   _avg?: Prisma.ManifestJobAvgOrderByAggregateInput
   _max?: Prisma.ManifestJobMaxOrderByAggregateInput
@@ -391,6 +453,10 @@ export type ManifestJobScalarWhereWithAggregatesInput = {
   fileHash?: Prisma.StringWithAggregatesFilter<"ManifestJob"> | string
   driveFileId?: Prisma.StringNullableWithAggregatesFilter<"ManifestJob"> | string | null
   driveFileUrl?: Prisma.StringNullableWithAggregatesFilter<"ManifestJob"> | string | null
+  storageProvider?: Prisma.StringNullableWithAggregatesFilter<"ManifestJob"> | string | null
+  storageKey?: Prisma.StringNullableWithAggregatesFilter<"ManifestJob"> | string | null
+  fileSize?: Prisma.IntNullableWithAggregatesFilter<"ManifestJob"> | number | null
+  pdfData?: Prisma.BytesNullableWithAggregatesFilter<"ManifestJob"> | runtime.Bytes | null
   rawText?: Prisma.StringNullableWithAggregatesFilter<"ManifestJob"> | string | null
   extractedJson?: Prisma.JsonNullableWithAggregatesFilter<"ManifestJob">
   overallConfidence?: Prisma.DecimalNullableWithAggregatesFilter<"ManifestJob"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -402,6 +468,7 @@ export type ManifestJobScalarWhereWithAggregatesInput = {
   updatedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"ManifestJob"> | Date | string | null
   startedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"ManifestJob"> | Date | string | null
   completedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"ManifestJob"> | Date | string | null
+  reviewedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"ManifestJob"> | Date | string | null
 }
 
 export type ManifestJobCreateInput = {
@@ -410,6 +477,10 @@ export type ManifestJobCreateInput = {
   fileHash: string
   driveFileId?: string | null
   driveFileUrl?: string | null
+  storageProvider?: string | null
+  storageKey?: string | null
+  fileSize?: number | null
+  pdfData?: runtime.Bytes | null
   rawText?: string | null
   extractedJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -420,7 +491,9 @@ export type ManifestJobCreateInput = {
   updatedAt?: Date | string | null
   startedAt?: Date | string | null
   completedAt?: Date | string | null
+  reviewedAt?: Date | string | null
   manifest?: Prisma.ManifestCreateNestedOneWithoutJobsInput
+  corrections?: Prisma.ManifestFieldCorrectionCreateNestedManyWithoutJobInput
 }
 
 export type ManifestJobUncheckedCreateInput = {
@@ -429,6 +502,10 @@ export type ManifestJobUncheckedCreateInput = {
   fileHash: string
   driveFileId?: string | null
   driveFileUrl?: string | null
+  storageProvider?: string | null
+  storageKey?: string | null
+  fileSize?: number | null
+  pdfData?: runtime.Bytes | null
   rawText?: string | null
   extractedJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -440,6 +517,8 @@ export type ManifestJobUncheckedCreateInput = {
   updatedAt?: Date | string | null
   startedAt?: Date | string | null
   completedAt?: Date | string | null
+  reviewedAt?: Date | string | null
+  corrections?: Prisma.ManifestFieldCorrectionUncheckedCreateNestedManyWithoutJobInput
 }
 
 export type ManifestJobUpdateInput = {
@@ -448,6 +527,10 @@ export type ManifestJobUpdateInput = {
   fileHash?: Prisma.StringFieldUpdateOperationsInput | string
   driveFileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   driveFileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileSize?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  pdfData?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   rawText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractedJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -458,7 +541,9 @@ export type ManifestJobUpdateInput = {
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   manifest?: Prisma.ManifestUpdateOneWithoutJobsNestedInput
+  corrections?: Prisma.ManifestFieldCorrectionUpdateManyWithoutJobNestedInput
 }
 
 export type ManifestJobUncheckedUpdateInput = {
@@ -467,6 +552,10 @@ export type ManifestJobUncheckedUpdateInput = {
   fileHash?: Prisma.StringFieldUpdateOperationsInput | string
   driveFileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   driveFileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileSize?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  pdfData?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   rawText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractedJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -478,6 +567,8 @@ export type ManifestJobUncheckedUpdateInput = {
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  corrections?: Prisma.ManifestFieldCorrectionUncheckedUpdateManyWithoutJobNestedInput
 }
 
 export type ManifestJobCreateManyInput = {
@@ -486,6 +577,10 @@ export type ManifestJobCreateManyInput = {
   fileHash: string
   driveFileId?: string | null
   driveFileUrl?: string | null
+  storageProvider?: string | null
+  storageKey?: string | null
+  fileSize?: number | null
+  pdfData?: runtime.Bytes | null
   rawText?: string | null
   extractedJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -497,6 +592,7 @@ export type ManifestJobCreateManyInput = {
   updatedAt?: Date | string | null
   startedAt?: Date | string | null
   completedAt?: Date | string | null
+  reviewedAt?: Date | string | null
 }
 
 export type ManifestJobUpdateManyMutationInput = {
@@ -505,6 +601,10 @@ export type ManifestJobUpdateManyMutationInput = {
   fileHash?: Prisma.StringFieldUpdateOperationsInput | string
   driveFileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   driveFileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileSize?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  pdfData?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   rawText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractedJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -515,6 +615,7 @@ export type ManifestJobUpdateManyMutationInput = {
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type ManifestJobUncheckedUpdateManyInput = {
@@ -523,6 +624,10 @@ export type ManifestJobUncheckedUpdateManyInput = {
   fileHash?: Prisma.StringFieldUpdateOperationsInput | string
   driveFileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   driveFileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileSize?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  pdfData?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   rawText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractedJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -534,6 +639,7 @@ export type ManifestJobUncheckedUpdateManyInput = {
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type ManifestJobListRelationFilter = {
@@ -552,6 +658,10 @@ export type ManifestJobCountOrderByAggregateInput = {
   fileHash?: Prisma.SortOrder
   driveFileId?: Prisma.SortOrder
   driveFileUrl?: Prisma.SortOrder
+  storageProvider?: Prisma.SortOrder
+  storageKey?: Prisma.SortOrder
+  fileSize?: Prisma.SortOrder
+  pdfData?: Prisma.SortOrder
   rawText?: Prisma.SortOrder
   extractedJson?: Prisma.SortOrder
   overallConfidence?: Prisma.SortOrder
@@ -563,10 +673,12 @@ export type ManifestJobCountOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
   startedAt?: Prisma.SortOrder
   completedAt?: Prisma.SortOrder
+  reviewedAt?: Prisma.SortOrder
 }
 
 export type ManifestJobAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  fileSize?: Prisma.SortOrder
   overallConfidence?: Prisma.SortOrder
   manifestId?: Prisma.SortOrder
   attempts?: Prisma.SortOrder
@@ -578,6 +690,10 @@ export type ManifestJobMaxOrderByAggregateInput = {
   fileHash?: Prisma.SortOrder
   driveFileId?: Prisma.SortOrder
   driveFileUrl?: Prisma.SortOrder
+  storageProvider?: Prisma.SortOrder
+  storageKey?: Prisma.SortOrder
+  fileSize?: Prisma.SortOrder
+  pdfData?: Prisma.SortOrder
   rawText?: Prisma.SortOrder
   overallConfidence?: Prisma.SortOrder
   manifestId?: Prisma.SortOrder
@@ -588,6 +704,7 @@ export type ManifestJobMaxOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
   startedAt?: Prisma.SortOrder
   completedAt?: Prisma.SortOrder
+  reviewedAt?: Prisma.SortOrder
 }
 
 export type ManifestJobMinOrderByAggregateInput = {
@@ -596,6 +713,10 @@ export type ManifestJobMinOrderByAggregateInput = {
   fileHash?: Prisma.SortOrder
   driveFileId?: Prisma.SortOrder
   driveFileUrl?: Prisma.SortOrder
+  storageProvider?: Prisma.SortOrder
+  storageKey?: Prisma.SortOrder
+  fileSize?: Prisma.SortOrder
+  pdfData?: Prisma.SortOrder
   rawText?: Prisma.SortOrder
   overallConfidence?: Prisma.SortOrder
   manifestId?: Prisma.SortOrder
@@ -606,13 +727,20 @@ export type ManifestJobMinOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
   startedAt?: Prisma.SortOrder
   completedAt?: Prisma.SortOrder
+  reviewedAt?: Prisma.SortOrder
 }
 
 export type ManifestJobSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  fileSize?: Prisma.SortOrder
   overallConfidence?: Prisma.SortOrder
   manifestId?: Prisma.SortOrder
   attempts?: Prisma.SortOrder
+}
+
+export type ManifestJobScalarRelationFilter = {
+  is?: Prisma.ManifestJobWhereInput
+  isNot?: Prisma.ManifestJobWhereInput
 }
 
 export type ManifestJobCreateNestedManyWithoutManifestInput = {
@@ -657,8 +785,34 @@ export type ManifestJobUncheckedUpdateManyWithoutManifestNestedInput = {
   deleteMany?: Prisma.ManifestJobScalarWhereInput | Prisma.ManifestJobScalarWhereInput[]
 }
 
+export type NullableIntFieldUpdateOperationsInput = {
+  set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
+export type NullableBytesFieldUpdateOperationsInput = {
+  set?: runtime.Bytes | null
+}
+
 export type EnumManifestJobStatusFieldUpdateOperationsInput = {
   set?: $Enums.ManifestJobStatus
+}
+
+export type ManifestJobCreateNestedOneWithoutCorrectionsInput = {
+  create?: Prisma.XOR<Prisma.ManifestJobCreateWithoutCorrectionsInput, Prisma.ManifestJobUncheckedCreateWithoutCorrectionsInput>
+  connectOrCreate?: Prisma.ManifestJobCreateOrConnectWithoutCorrectionsInput
+  connect?: Prisma.ManifestJobWhereUniqueInput
+}
+
+export type ManifestJobUpdateOneRequiredWithoutCorrectionsNestedInput = {
+  create?: Prisma.XOR<Prisma.ManifestJobCreateWithoutCorrectionsInput, Prisma.ManifestJobUncheckedCreateWithoutCorrectionsInput>
+  connectOrCreate?: Prisma.ManifestJobCreateOrConnectWithoutCorrectionsInput
+  upsert?: Prisma.ManifestJobUpsertWithoutCorrectionsInput
+  connect?: Prisma.ManifestJobWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ManifestJobUpdateToOneWithWhereWithoutCorrectionsInput, Prisma.ManifestJobUpdateWithoutCorrectionsInput>, Prisma.ManifestJobUncheckedUpdateWithoutCorrectionsInput>
 }
 
 export type ManifestJobCreateWithoutManifestInput = {
@@ -667,6 +821,10 @@ export type ManifestJobCreateWithoutManifestInput = {
   fileHash: string
   driveFileId?: string | null
   driveFileUrl?: string | null
+  storageProvider?: string | null
+  storageKey?: string | null
+  fileSize?: number | null
+  pdfData?: runtime.Bytes | null
   rawText?: string | null
   extractedJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -677,6 +835,8 @@ export type ManifestJobCreateWithoutManifestInput = {
   updatedAt?: Date | string | null
   startedAt?: Date | string | null
   completedAt?: Date | string | null
+  reviewedAt?: Date | string | null
+  corrections?: Prisma.ManifestFieldCorrectionCreateNestedManyWithoutJobInput
 }
 
 export type ManifestJobUncheckedCreateWithoutManifestInput = {
@@ -685,6 +845,10 @@ export type ManifestJobUncheckedCreateWithoutManifestInput = {
   fileHash: string
   driveFileId?: string | null
   driveFileUrl?: string | null
+  storageProvider?: string | null
+  storageKey?: string | null
+  fileSize?: number | null
+  pdfData?: runtime.Bytes | null
   rawText?: string | null
   extractedJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -695,6 +859,8 @@ export type ManifestJobUncheckedCreateWithoutManifestInput = {
   updatedAt?: Date | string | null
   startedAt?: Date | string | null
   completedAt?: Date | string | null
+  reviewedAt?: Date | string | null
+  corrections?: Prisma.ManifestFieldCorrectionUncheckedCreateNestedManyWithoutJobInput
 }
 
 export type ManifestJobCreateOrConnectWithoutManifestInput = {
@@ -732,6 +898,10 @@ export type ManifestJobScalarWhereInput = {
   fileHash?: Prisma.StringFilter<"ManifestJob"> | string
   driveFileId?: Prisma.StringNullableFilter<"ManifestJob"> | string | null
   driveFileUrl?: Prisma.StringNullableFilter<"ManifestJob"> | string | null
+  storageProvider?: Prisma.StringNullableFilter<"ManifestJob"> | string | null
+  storageKey?: Prisma.StringNullableFilter<"ManifestJob"> | string | null
+  fileSize?: Prisma.IntNullableFilter<"ManifestJob"> | number | null
+  pdfData?: Prisma.BytesNullableFilter<"ManifestJob"> | runtime.Bytes | null
   rawText?: Prisma.StringNullableFilter<"ManifestJob"> | string | null
   extractedJson?: Prisma.JsonNullableFilter<"ManifestJob">
   overallConfidence?: Prisma.DecimalNullableFilter<"ManifestJob"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -743,14 +913,19 @@ export type ManifestJobScalarWhereInput = {
   updatedAt?: Prisma.DateTimeNullableFilter<"ManifestJob"> | Date | string | null
   startedAt?: Prisma.DateTimeNullableFilter<"ManifestJob"> | Date | string | null
   completedAt?: Prisma.DateTimeNullableFilter<"ManifestJob"> | Date | string | null
+  reviewedAt?: Prisma.DateTimeNullableFilter<"ManifestJob"> | Date | string | null
 }
 
-export type ManifestJobCreateManyManifestInput = {
+export type ManifestJobCreateWithoutCorrectionsInput = {
   id?: bigint | number
   originalFileName: string
   fileHash: string
   driveFileId?: string | null
   driveFileUrl?: string | null
+  storageProvider?: string | null
+  storageKey?: string | null
+  fileSize?: number | null
+  pdfData?: runtime.Bytes | null
   rawText?: string | null
   extractedJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -761,6 +936,119 @@ export type ManifestJobCreateManyManifestInput = {
   updatedAt?: Date | string | null
   startedAt?: Date | string | null
   completedAt?: Date | string | null
+  reviewedAt?: Date | string | null
+  manifest?: Prisma.ManifestCreateNestedOneWithoutJobsInput
+}
+
+export type ManifestJobUncheckedCreateWithoutCorrectionsInput = {
+  id?: bigint | number
+  originalFileName: string
+  fileHash: string
+  driveFileId?: string | null
+  driveFileUrl?: string | null
+  storageProvider?: string | null
+  storageKey?: string | null
+  fileSize?: number | null
+  pdfData?: runtime.Bytes | null
+  rawText?: string | null
+  extractedJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  overallConfidence?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  manifestId?: bigint | number | null
+  status?: $Enums.ManifestJobStatus
+  attempts?: number
+  errorMessage?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  reviewedAt?: Date | string | null
+}
+
+export type ManifestJobCreateOrConnectWithoutCorrectionsInput = {
+  where: Prisma.ManifestJobWhereUniqueInput
+  create: Prisma.XOR<Prisma.ManifestJobCreateWithoutCorrectionsInput, Prisma.ManifestJobUncheckedCreateWithoutCorrectionsInput>
+}
+
+export type ManifestJobUpsertWithoutCorrectionsInput = {
+  update: Prisma.XOR<Prisma.ManifestJobUpdateWithoutCorrectionsInput, Prisma.ManifestJobUncheckedUpdateWithoutCorrectionsInput>
+  create: Prisma.XOR<Prisma.ManifestJobCreateWithoutCorrectionsInput, Prisma.ManifestJobUncheckedCreateWithoutCorrectionsInput>
+  where?: Prisma.ManifestJobWhereInput
+}
+
+export type ManifestJobUpdateToOneWithWhereWithoutCorrectionsInput = {
+  where?: Prisma.ManifestJobWhereInput
+  data: Prisma.XOR<Prisma.ManifestJobUpdateWithoutCorrectionsInput, Prisma.ManifestJobUncheckedUpdateWithoutCorrectionsInput>
+}
+
+export type ManifestJobUpdateWithoutCorrectionsInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  originalFileName?: Prisma.StringFieldUpdateOperationsInput | string
+  fileHash?: Prisma.StringFieldUpdateOperationsInput | string
+  driveFileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  driveFileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileSize?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  pdfData?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  rawText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  extractedJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  overallConfidence?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  status?: Prisma.EnumManifestJobStatusFieldUpdateOperationsInput | $Enums.ManifestJobStatus
+  attempts?: Prisma.IntFieldUpdateOperationsInput | number
+  errorMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  manifest?: Prisma.ManifestUpdateOneWithoutJobsNestedInput
+}
+
+export type ManifestJobUncheckedUpdateWithoutCorrectionsInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  originalFileName?: Prisma.StringFieldUpdateOperationsInput | string
+  fileHash?: Prisma.StringFieldUpdateOperationsInput | string
+  driveFileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  driveFileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileSize?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  pdfData?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  rawText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  extractedJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  overallConfidence?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  manifestId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  status?: Prisma.EnumManifestJobStatusFieldUpdateOperationsInput | $Enums.ManifestJobStatus
+  attempts?: Prisma.IntFieldUpdateOperationsInput | number
+  errorMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type ManifestJobCreateManyManifestInput = {
+  id?: bigint | number
+  originalFileName: string
+  fileHash: string
+  driveFileId?: string | null
+  driveFileUrl?: string | null
+  storageProvider?: string | null
+  storageKey?: string | null
+  fileSize?: number | null
+  pdfData?: runtime.Bytes | null
+  rawText?: string | null
+  extractedJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  overallConfidence?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  status?: $Enums.ManifestJobStatus
+  attempts?: number
+  errorMessage?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  reviewedAt?: Date | string | null
 }
 
 export type ManifestJobUpdateWithoutManifestInput = {
@@ -769,6 +1057,10 @@ export type ManifestJobUpdateWithoutManifestInput = {
   fileHash?: Prisma.StringFieldUpdateOperationsInput | string
   driveFileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   driveFileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileSize?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  pdfData?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   rawText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractedJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -779,6 +1071,8 @@ export type ManifestJobUpdateWithoutManifestInput = {
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  corrections?: Prisma.ManifestFieldCorrectionUpdateManyWithoutJobNestedInput
 }
 
 export type ManifestJobUncheckedUpdateWithoutManifestInput = {
@@ -787,6 +1081,10 @@ export type ManifestJobUncheckedUpdateWithoutManifestInput = {
   fileHash?: Prisma.StringFieldUpdateOperationsInput | string
   driveFileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   driveFileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileSize?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  pdfData?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   rawText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractedJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -797,6 +1095,8 @@ export type ManifestJobUncheckedUpdateWithoutManifestInput = {
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  corrections?: Prisma.ManifestFieldCorrectionUncheckedUpdateManyWithoutJobNestedInput
 }
 
 export type ManifestJobUncheckedUpdateManyWithoutManifestInput = {
@@ -805,6 +1105,10 @@ export type ManifestJobUncheckedUpdateManyWithoutManifestInput = {
   fileHash?: Prisma.StringFieldUpdateOperationsInput | string
   driveFileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   driveFileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileSize?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  pdfData?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   rawText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractedJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -815,8 +1119,38 @@ export type ManifestJobUncheckedUpdateManyWithoutManifestInput = {
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
+
+/**
+ * Count Type ManifestJobCountOutputType
+ */
+
+export type ManifestJobCountOutputType = {
+  corrections: number
+}
+
+export type ManifestJobCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  corrections?: boolean | ManifestJobCountOutputTypeCountCorrectionsArgs
+}
+
+/**
+ * ManifestJobCountOutputType without action
+ */
+export type ManifestJobCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ManifestJobCountOutputType
+   */
+  select?: Prisma.ManifestJobCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * ManifestJobCountOutputType without action
+ */
+export type ManifestJobCountOutputTypeCountCorrectionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ManifestFieldCorrectionWhereInput
+}
 
 
 export type ManifestJobSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -825,6 +1159,10 @@ export type ManifestJobSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   fileHash?: boolean
   driveFileId?: boolean
   driveFileUrl?: boolean
+  storageProvider?: boolean
+  storageKey?: boolean
+  fileSize?: boolean
+  pdfData?: boolean
   rawText?: boolean
   extractedJson?: boolean
   overallConfidence?: boolean
@@ -836,7 +1174,10 @@ export type ManifestJobSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   updatedAt?: boolean
   startedAt?: boolean
   completedAt?: boolean
+  reviewedAt?: boolean
   manifest?: boolean | Prisma.ManifestJob$manifestArgs<ExtArgs>
+  corrections?: boolean | Prisma.ManifestJob$correctionsArgs<ExtArgs>
+  _count?: boolean | Prisma.ManifestJobCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["manifestJob"]>
 
 export type ManifestJobSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -845,6 +1186,10 @@ export type ManifestJobSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   fileHash?: boolean
   driveFileId?: boolean
   driveFileUrl?: boolean
+  storageProvider?: boolean
+  storageKey?: boolean
+  fileSize?: boolean
+  pdfData?: boolean
   rawText?: boolean
   extractedJson?: boolean
   overallConfidence?: boolean
@@ -856,6 +1201,7 @@ export type ManifestJobSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   updatedAt?: boolean
   startedAt?: boolean
   completedAt?: boolean
+  reviewedAt?: boolean
   manifest?: boolean | Prisma.ManifestJob$manifestArgs<ExtArgs>
 }, ExtArgs["result"]["manifestJob"]>
 
@@ -865,6 +1211,10 @@ export type ManifestJobSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   fileHash?: boolean
   driveFileId?: boolean
   driveFileUrl?: boolean
+  storageProvider?: boolean
+  storageKey?: boolean
+  fileSize?: boolean
+  pdfData?: boolean
   rawText?: boolean
   extractedJson?: boolean
   overallConfidence?: boolean
@@ -876,6 +1226,7 @@ export type ManifestJobSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   updatedAt?: boolean
   startedAt?: boolean
   completedAt?: boolean
+  reviewedAt?: boolean
   manifest?: boolean | Prisma.ManifestJob$manifestArgs<ExtArgs>
 }, ExtArgs["result"]["manifestJob"]>
 
@@ -885,6 +1236,10 @@ export type ManifestJobSelectScalar = {
   fileHash?: boolean
   driveFileId?: boolean
   driveFileUrl?: boolean
+  storageProvider?: boolean
+  storageKey?: boolean
+  fileSize?: boolean
+  pdfData?: boolean
   rawText?: boolean
   extractedJson?: boolean
   overallConfidence?: boolean
@@ -896,11 +1251,14 @@ export type ManifestJobSelectScalar = {
   updatedAt?: boolean
   startedAt?: boolean
   completedAt?: boolean
+  reviewedAt?: boolean
 }
 
-export type ManifestJobOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "originalFileName" | "fileHash" | "driveFileId" | "driveFileUrl" | "rawText" | "extractedJson" | "overallConfidence" | "manifestId" | "status" | "attempts" | "errorMessage" | "createdAt" | "updatedAt" | "startedAt" | "completedAt", ExtArgs["result"]["manifestJob"]>
+export type ManifestJobOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "originalFileName" | "fileHash" | "driveFileId" | "driveFileUrl" | "storageProvider" | "storageKey" | "fileSize" | "pdfData" | "rawText" | "extractedJson" | "overallConfidence" | "manifestId" | "status" | "attempts" | "errorMessage" | "createdAt" | "updatedAt" | "startedAt" | "completedAt" | "reviewedAt", ExtArgs["result"]["manifestJob"]>
 export type ManifestJobInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   manifest?: boolean | Prisma.ManifestJob$manifestArgs<ExtArgs>
+  corrections?: boolean | Prisma.ManifestJob$correctionsArgs<ExtArgs>
+  _count?: boolean | Prisma.ManifestJobCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ManifestJobIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   manifest?: boolean | Prisma.ManifestJob$manifestArgs<ExtArgs>
@@ -913,6 +1271,7 @@ export type $ManifestJobPayload<ExtArgs extends runtime.Types.Extensions.Interna
   name: "ManifestJob"
   objects: {
     manifest: Prisma.$ManifestPayload<ExtArgs> | null
+    corrections: Prisma.$ManifestFieldCorrectionPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: bigint
@@ -920,6 +1279,10 @@ export type $ManifestJobPayload<ExtArgs extends runtime.Types.Extensions.Interna
     fileHash: string
     driveFileId: string | null
     driveFileUrl: string | null
+    storageProvider: string | null
+    storageKey: string | null
+    fileSize: number | null
+    pdfData: runtime.Bytes | null
     rawText: string | null
     extractedJson: runtime.JsonValue | null
     overallConfidence: runtime.Decimal | null
@@ -931,6 +1294,7 @@ export type $ManifestJobPayload<ExtArgs extends runtime.Types.Extensions.Interna
     updatedAt: Date | null
     startedAt: Date | null
     completedAt: Date | null
+    reviewedAt: Date | null
   }, ExtArgs["result"]["manifestJob"]>
   composites: {}
 }
@@ -1326,6 +1690,7 @@ readonly fields: ManifestJobFieldRefs;
 export interface Prisma__ManifestJobClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   manifest<T extends Prisma.ManifestJob$manifestArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ManifestJob$manifestArgs<ExtArgs>>): Prisma.Prisma__ManifestClient<runtime.Types.Result.GetResult<Prisma.$ManifestPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  corrections<T extends Prisma.ManifestJob$correctionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ManifestJob$correctionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ManifestFieldCorrectionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1360,6 +1725,10 @@ export interface ManifestJobFieldRefs {
   readonly fileHash: Prisma.FieldRef<"ManifestJob", 'String'>
   readonly driveFileId: Prisma.FieldRef<"ManifestJob", 'String'>
   readonly driveFileUrl: Prisma.FieldRef<"ManifestJob", 'String'>
+  readonly storageProvider: Prisma.FieldRef<"ManifestJob", 'String'>
+  readonly storageKey: Prisma.FieldRef<"ManifestJob", 'String'>
+  readonly fileSize: Prisma.FieldRef<"ManifestJob", 'Int'>
+  readonly pdfData: Prisma.FieldRef<"ManifestJob", 'Bytes'>
   readonly rawText: Prisma.FieldRef<"ManifestJob", 'String'>
   readonly extractedJson: Prisma.FieldRef<"ManifestJob", 'Json'>
   readonly overallConfidence: Prisma.FieldRef<"ManifestJob", 'Decimal'>
@@ -1371,6 +1740,7 @@ export interface ManifestJobFieldRefs {
   readonly updatedAt: Prisma.FieldRef<"ManifestJob", 'DateTime'>
   readonly startedAt: Prisma.FieldRef<"ManifestJob", 'DateTime'>
   readonly completedAt: Prisma.FieldRef<"ManifestJob", 'DateTime'>
+  readonly reviewedAt: Prisma.FieldRef<"ManifestJob", 'DateTime'>
 }
     
 
@@ -1788,6 +2158,30 @@ export type ManifestJob$manifestArgs<ExtArgs extends runtime.Types.Extensions.In
    */
   include?: Prisma.ManifestInclude<ExtArgs> | null
   where?: Prisma.ManifestWhereInput
+}
+
+/**
+ * ManifestJob.corrections
+ */
+export type ManifestJob$correctionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ManifestFieldCorrection
+   */
+  select?: Prisma.ManifestFieldCorrectionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ManifestFieldCorrection
+   */
+  omit?: Prisma.ManifestFieldCorrectionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ManifestFieldCorrectionInclude<ExtArgs> | null
+  where?: Prisma.ManifestFieldCorrectionWhereInput
+  orderBy?: Prisma.ManifestFieldCorrectionOrderByWithRelationInput | Prisma.ManifestFieldCorrectionOrderByWithRelationInput[]
+  cursor?: Prisma.ManifestFieldCorrectionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ManifestFieldCorrectionScalarFieldEnum | Prisma.ManifestFieldCorrectionScalarFieldEnum[]
 }
 
 /**
