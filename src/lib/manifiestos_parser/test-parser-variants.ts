@@ -1,5 +1,5 @@
 import { extractPdfTextFromFile } from "./pdf";
-import { parseManifestText, summarizeConfidence } from "./manifest-parser";
+import { MANIFEST_VARIANT_LABELS, parseManifestDocument, summarizeConfidence } from "./manifest-parser";
 
 const files = process.argv.slice(2);
 
@@ -19,11 +19,11 @@ for (const [index, file] of files.entries()) {
 
   try {
     const pdf = await extractPdfTextFromFile(file);
-    const extraction = parseManifestText(pdf.text);
+    const { extraction, variant } = parseManifestDocument({ text: pdf.text, firstPageItems: pdf.items[0] });
     const summary = summarizeConfidence(extraction);
 
+    console.log(`Formato: ${MANIFEST_VARIANT_LABELS[variant]}`);
     console.log(`Páginas PDF: ${pdf.pageCount}`);
-    console.log("Páginas usadas por parser: 1");
     console.log(`Manifesto: ${extraction.manifest.manifestNumber.value ?? "N/A"}`);
     console.log(`Autorización: ${extraction.manifest.authorizationNumber.value ?? "N/A"}`);
     console.log(`Placa: ${extraction.vehicle.plate.value ?? "N/A"}`);

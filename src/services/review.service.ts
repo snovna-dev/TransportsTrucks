@@ -8,7 +8,7 @@ import {
 } from "./extraction.service";
 import { ManifestValidationError, persistManifest } from "./manifest.service";
 import { manifestPdfUrl } from "./processing.service";
-import { parseStoredExtraction, toStoredExtraction } from "./stored-extraction";
+import { parseStoredExtraction, toStoredExtraction, type StoredExtraction } from "./stored-extraction";
 import type { ManifestExtraction } from "../types/manifest-extraction";
 
 export type ReviewValues = Record<string, string | number | null>;
@@ -110,16 +110,16 @@ function applyValues(extraction: ManifestExtraction, values: ReviewValues) {
 
 async function saveCorrections(
     jobId: bigint,
-    extraction: ManifestExtraction,
-    pageCount: number,
+    stored: StoredExtraction,
     corrections: ReturnType<typeof applyValues>,
 ) {
+    const { extraction } = stored;
     const evaluation = evaluateExtraction(extraction);
     await prisma.$transaction([
         prisma.manifestJob.update({
             where: { id: jobId },
             data: {
-                extractedJson: toStoredExtraction({ extraction, pageCount }) as object,
+                extractedJson: toStoredExtraction(stored) as object,
                 overallConfidence: evaluation.overallConfidence,
                 updatedAt: new Date(),
             },
@@ -142,7 +142,7 @@ async function saveCorrections(
 export async function saveReview(jobId: bigint, values: ReviewValues) {
     const { stored } = await loadReviewableJob(jobId);
     const corrections = applyValues(stored.extraction, values);
-    const evaluation = await saveCorrections(jobId, stored.extraction, stored.pageCount, corrections);
+    const evaluation = await saveCorrections(jobId, stored, corrections);
     return { corrections: corrections.length, evaluation };
 }
 
@@ -163,7 +163,7 @@ export async function completeReview(jobId: bigint, values: ReviewValues = {}) {
     });
 
     if (missing.length > 0) {
-        await saveCorrections(jobId, extraction, stored.pageCount, corrections);
+        await saveCorrections(jobId, stored, corrections);
         throw new ReviewError(
             `Faltan campos obligatorios: ${missing.map((field) => `${field.group} · ${field.label}`).join(", ")}.`,
             422,
@@ -177,7 +177,7 @@ export async function completeReview(jobId: bigint, values: ReviewValues = {}) {
         if (current) setExtractedField(extraction, field.path, { ...current, confidence: 1, source: "USER" });
     }
 
-    const evaluation = await saveCorrections(jobId, extraction, stored.pageCount, corrections);
+    const evaluation = await saveCorrections(jobId, stored, corrections);
 
     try {
         const persisted = await persistManifest({

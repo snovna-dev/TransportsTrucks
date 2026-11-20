@@ -44,6 +44,26 @@ Carga de PDF de manifiestos electrónicos de carga (RNDC), extracción automáti
 | `POST /api/manifest-jobs/worker?token=…` | Push de Pub/Sub (solo con `PROCESSING_MODE=pubsub`). |
 | `GET /api/google/drive/authorize` | Obtiene el refresh token de Drive (solo con `GOOGLE_OAUTH_SETUP_ENABLED=true`). |
 
+## Formatos de PDF soportados
+
+El formato se detecta automáticamente (`parseManifestDocument` en `src/lib/manifiestos_parser/manifest-parser.ts`) y se muestra en la pantalla de revisión.
+
+| Formato | Empresas probadas | Cómo se lee |
+|---|---|---|
+| `TANQUES` | Tanques del Nordeste S.A. | Parser de texto original (`manifest-parser.ts`). |
+| `OPL` | OPL Carga SAS | Por coordenadas (`template-parsers.ts`): valores alineados a la izquierda de cada encabezado. |
+| `RNDC_B` | Quick Help S.A.S (y el mismo formato de Transportes Pacar) | Por coordenadas: valores centrados bajo el encabezado, fechas tipo `2024/ago/02`. |
+| `PACAR` | Transportes Pacar S.A.S | Parser Pacar original combinado con el lector `RNDC_B`. |
+| `DESCONOCIDO` | Cualquier otro | Parser general, con todos los campos limitados a 90 % de confianza para que siempre pase por revisión. |
+
+Los lectores por coordenadas (`layout-grid.ts`) ubican cada dato por su etiqueta y su posición en la página, así que no dependen de placas, nombres ni números concretos. Si un valor no tiene la forma esperada (placa `ABC123`, NIT numérico, etc.), queda con 80 % de confianza y se pide revisión.
+
+Para probar uno o varios PDF sin base de datos:
+
+```powershell
+npm run test:parser:variants -- "manifiesto 1.pdf" "manifiesto 2.pdf" "manifiesto 3.pdf"
+```
+
 ## Reglas de campos
 
 Definidas en `src/lib/manifest-fields.ts`:

@@ -1,7 +1,8 @@
 import { extractPdfText } from "../lib/manifiestos_parser/pdf";
 import {
-  parseManifestText,
+  parseManifestDocument,
   summarizeConfidence,
+  type ManifestVariant,
 } from "../lib/manifiestos_parser/manifest-parser";
 import {
   getConfidenceAction,
@@ -49,6 +50,8 @@ export interface ExtractionServiceResult extends ExtractionEvaluation {
   rawText: string;
   pageCount: number;
   hasText: boolean;
+  /** Formato de PDF detectado (OPL, RNDC_B, PACAR, TANQUES o DESCONOCIDO). */
+  variant: ManifestVariant;
 }
 
 /** Campos sin los cuales no se puede guardar el Manifest. */
@@ -178,8 +181,11 @@ export async function extractManifestFromPdf(
   const pdf = await extractPdfText(input);
 
   let extraction: ManifestExtraction;
+  let variant: ManifestVariant;
   try {
-    extraction = validateExtraction(parseManifestText(pdf.text));
+    const parsed = parseManifestDocument({ text: pdf.text, firstPageItems: pdf.items[0] });
+    extraction = validateExtraction(parsed.extraction);
+    variant = parsed.variant;
   } catch (error) {
     throw new Error("No fue posible validar la extracción del manifiesto.", {
       cause: error,
@@ -193,6 +199,7 @@ export async function extractManifestFromPdf(
     rawText: pdf.fullText,
     pageCount: pdf.pageCount,
     hasText: pdf.hasText,
+    variant,
     ...evaluateExtraction(extraction),
   };
 }

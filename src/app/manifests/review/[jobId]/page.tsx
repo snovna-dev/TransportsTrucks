@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { parseId } from "../../../../lib/api";
+import { MANIFEST_VARIANT_LABELS } from "../../../../lib/manifiestos_parser/manifest-parser";
 import { FIELD_DEFINITIONS } from "../../../../lib/manifest-fields";
 import { formatDateTime, formatJson, formatPercent } from "../../../../lib/format";
 import { getExtractedField } from "../../../../services/extraction.service";
@@ -53,6 +54,11 @@ export default async function ReviewJobPage({ params }: { params: Promise<{ jobI
         <h1 className="text-xl font-semibold">Revisión: {job.originalFileName}</h1>
         <ManifestStatus status={job.status} />
         <span className="text-sm text-slate-500">Confianza global {formatPercent(job.overallConfidence)}</span>
+        {stored?.variant && (
+          <span className="text-sm text-slate-500">
+            · {MANIFEST_VARIANT_LABELS[stored.variant as keyof typeof MANIFEST_VARIANT_LABELS] ?? stored.variant}
+          </span>
+        )}
         <span className="ml-auto">
           <ReprocessButton jobId={job.id.toString()} force label="Volver a extraer del PDF" />
         </span>

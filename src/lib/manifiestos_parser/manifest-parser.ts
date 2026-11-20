@@ -11,6 +11,14 @@ import {
   type ParsedLine,
 } from "./section-parser";
 import { isPacarVariant, parsePacar } from "./pacar-variant-parser";
+import type { StructuredTextItem } from "unpdf";
+import { toGridItems } from "./layout-grid";
+import {
+  isOplTemplate,
+  isRndcBTemplate,
+  parseOplTemplate,
+  parseRndcBTemplate,
+} from "./template-parsers";
 
 const SOURCE = "PDF_TEXT" as const;
 
@@ -1117,3 +1125,91 @@ export function summarizeConfidence(extraction: ManifestExtraction) {
   visit(extraction);
   return counters;
 }
+
+export type ManifestVariant =
+  | "TANQUES"
+  | "PACAR"
+  | "RNDC_B"
+  | "OPL"
+  | "DESCONOCIDO";
+
+export const MANIFEST_VARIANT_LABELS: Record<ManifestVariant, string> = {
+  TANQUES: "Formato Tanques del Nordeste",
+  PACAR: "Formato Transportes Pacar",
+  RNDC_B: "Formato RNDC (Quick Help / Pacar)",
+  OPL: "Formato OPL Carga",
+  DESCONOCIDO: "Formato no reconocido",
+};
+
+/** Confianza máxima para formatos no reconocidos: obliga a revisar todo. */
+const UNKNOWN_FORMAT_MAX_CONFIDENCE = 0.9;
+
+function capConfidence(extraction: ManifestExtraction, max: number): ManifestExtraction {
+  const visit = (value: unknown) => {
+    if (!value || typeof value !== "object") return;
+    if ("value" in value && "confidence" in value) {
+      const field = value as ExtractedField<unknown>;
+      field.confidence = Math.min(field.confidence, max);
+      return;
+    }
+    Object.values(value).forEach(visit);
+  };
+  visit(extraction);
+  return extraction;
+}
+
+/** Combina dos extracciones: gana `primary` cuando tiene valor. */
+function mergeExtractions(primary: ManifestExtraction, fallback: ManifestExtraction): ManifestExtraction {
+  const result = JSON.parse(JSON.stringify(fallback)) as Record<string, Record<string, ExtractedField<unknown>>>;
+  const source = primary as unknown as Record<string, Record<string, ExtractedField<unknown>>>;
+  for (const [group, fields] of Object.entries(source)) {
+    for (const [key, field] of Object.entries(fields)) {
+      if (field.value !== null && result[group]) result[group][key] = field;
+    }
+  }
+  return result as unknown as ManifestExtraction;
+}
+
+/**
+ * Punto de entrada recomendado: detecta el formato del PDF y usa el parser
+ * adecuado. Los formatos tabulares (OPL, RNDC_B) se leen por coordenadas;
+ * Tanques sigue con el parser de texto validado. Si el formato no se
+ * reconoce, se usa el parser general pero todos los campos quedan para revisión.
+ */
+export function parseManifestDocument(input: {
+  text: string;
+  firstPageItems?: StructuredTextItem[];
+}): { extraction: ManifestExtraction; variant: ManifestVariant } {
+  const lines = parseSections(input.text).lines;
+  const grid = input.firstPageItems ? toGridItems(input.firstPageItems) : [];
+
+  if (grid.length > 0 && isOplTemplate(grid)) {
+    return { variant: "OPL", extraction: ManifestExtractionSchema.parse(parseOplTemplate(grid)) };
+  }
+
+  if (isPacarVariant(lines)) {
+    // El parser Pacar existente se validó con un PDF concreto; el de
+    // coordenadas generaliza a otros manifiestos del mismo formato.
+    const pacar = ManifestExtractionSchema.parse(parsePacar(lines));
+    if (grid.length > 0 && isRndcBTemplate(grid)) {
+      const generic = ManifestExtractionSchema.parse(parseRndcBTemplate(grid));
+      return { variant: "PACAR", extraction: mergeExtractions(pacar, generic) };
+    }
+    return { variant: "PACAR", extraction: pacar };
+  }
+
+  if (grid.length > 0 && isRndcBTemplate(grid)) {
+    return { variant: "RNDC_B", extraction: ManifestExtractionSchema.parse(parseRndcBTemplate(grid)) };
+  }
+
+  const extraction = buildExtraction(input.text);
+  const isTanques = lines.some(
+    (line) =>
+      line.normalized.includes("TANQUES DEL NORDESTE") ||
+      line.normalized.startsWith("FECHA EXPED (DIA/MES/ANO)"),
+  );
+  if (isTanques) return { variant: "TANQUES", extraction };
+
+  return { variant: "DESCONOCIDO", extraction: capConfidence(extraction, UNKNOWN_FORMAT_MAX_CONFIDENCE) };
+}
+
