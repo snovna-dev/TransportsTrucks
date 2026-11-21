@@ -5,7 +5,6 @@ import { prisma } from "../../../lib/prisma";
 import { getFieldLabel } from "../../../lib/manifest-fields";
 import { formatDate, formatDateTime, formatJson, formatMoney, formatNumber, formatPercent } from "../../../lib/format";
 import { ManifestStatus } from "../../../components/manifests/ManifestStatus";
-import { SupportingDocumentList } from "../../../components/manifests/SupportingDocumentList";
 
 export const dynamic = "force-dynamic";
 
@@ -49,23 +48,6 @@ export default async function ManifestDetailPage({ params }: { params: Promise<{
         select: { id: true, originalFileName: true, status: true, createdAt: true, reviewedAt: true },
       },
       corrections: { orderBy: { createdAt: "asc" } },
-      supportingDocuments: {
-        orderBy: [{ documentType: "asc" }, { issueDate: "asc" }],
-        select: {
-          id: true,
-          jobId: true,
-          documentType: true,
-          documentNumber: true,
-          manifestNumber: true,
-          manifestId: true,
-          linkMethod: true,
-          issueDate: true,
-          origin: true,
-          destination: true,
-          vehiclePlate: true,
-          job: { select: { originalFileName: true } },
-        },
-      },
     },
   });
   if (!manifest) notFound();
@@ -186,19 +168,6 @@ export default async function ManifestDetailPage({ params }: { params: Promise<{
           ]}
         />
       </div>
-
-      <section>
-        <div className="mb-2 flex items-center justify-between">
-          <h2 className="text-sm font-semibold">Documentos soporte (remesa y orden de cargue)</h2>
-          <Link href="/manifests/upload" className="text-sm text-blue-700 hover:underline">
-            Cargar documento
-          </Link>
-        </div>
-        <SupportingDocumentList
-          rows={m.supportingDocuments}
-          emptyText="Este manifiesto no tiene remesa ni orden de cargue cargadas."
-        />
-      </section>
 
       {m.corrections.length > 0 && (
         <section className="rounded-md border">

@@ -407,8 +407,7 @@ export const ModelName = {
   Cargo: 'Cargo',
   ManifestProcessing: 'ManifestProcessing',
   ManifestJob: 'ManifestJob',
-  ManifestFieldCorrection: 'ManifestFieldCorrection',
-  SupportingDocument: 'SupportingDocument'
+  ManifestFieldCorrection: 'ManifestFieldCorrection'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -424,7 +423,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "company" | "driver" | "vehicleHolder" | "manifestHolder" | "vehicle" | "personOrCompany" | "manifest" | "cargo" | "manifestProcessing" | "manifestJob" | "manifestFieldCorrection" | "supportingDocument"
+    modelProps: "company" | "driver" | "vehicleHolder" | "manifestHolder" | "vehicle" | "personOrCompany" | "manifest" | "cargo" | "manifestProcessing" | "manifestJob" | "manifestFieldCorrection"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1242,80 +1241,6 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
-    SupportingDocument: {
-      payload: Prisma.$SupportingDocumentPayload<ExtArgs>
-      fields: Prisma.SupportingDocumentFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.SupportingDocumentFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SupportingDocumentPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.SupportingDocumentFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SupportingDocumentPayload>
-        }
-        findFirst: {
-          args: Prisma.SupportingDocumentFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SupportingDocumentPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.SupportingDocumentFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SupportingDocumentPayload>
-        }
-        findMany: {
-          args: Prisma.SupportingDocumentFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SupportingDocumentPayload>[]
-        }
-        create: {
-          args: Prisma.SupportingDocumentCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SupportingDocumentPayload>
-        }
-        createMany: {
-          args: Prisma.SupportingDocumentCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        createManyAndReturn: {
-          args: Prisma.SupportingDocumentCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SupportingDocumentPayload>[]
-        }
-        delete: {
-          args: Prisma.SupportingDocumentDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SupportingDocumentPayload>
-        }
-        update: {
-          args: Prisma.SupportingDocumentUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SupportingDocumentPayload>
-        }
-        deleteMany: {
-          args: Prisma.SupportingDocumentDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.SupportingDocumentUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateManyAndReturn: {
-          args: Prisma.SupportingDocumentUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SupportingDocumentPayload>[]
-        }
-        upsert: {
-          args: Prisma.SupportingDocumentUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SupportingDocumentPayload>
-        }
-        aggregate: {
-          args: Prisma.SupportingDocumentAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateSupportingDocument>
-        }
-        groupBy: {
-          args: Prisma.SupportingDocumentGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.SupportingDocumentGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.SupportingDocumentCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.SupportingDocumentCountAggregateOutputType> | number
-        }
-      }
-    }
   }
 } & {
   other: {
@@ -1534,7 +1459,6 @@ export const ManifestJobScalarFieldEnum = {
   extractedJson: 'extractedJson',
   overallConfidence: 'overallConfidence',
   manifestId: 'manifestId',
-  documentType: 'documentType',
   status: 'status',
   attempts: 'attempts',
   errorMessage: 'errorMessage',
@@ -1563,30 +1487,6 @@ export const ManifestFieldCorrectionScalarFieldEnum = {
 export type ManifestFieldCorrectionScalarFieldEnum = (typeof ManifestFieldCorrectionScalarFieldEnum)[keyof typeof ManifestFieldCorrectionScalarFieldEnum]
 
 
-export const SupportingDocumentScalarFieldEnum = {
-  id: 'id',
-  jobId: 'jobId',
-  documentType: 'documentType',
-  documentNumber: 'documentNumber',
-  companyNit: 'companyNit',
-  companyName: 'companyName',
-  manifestNumber: 'manifestNumber',
-  manifestId: 'manifestId',
-  linkMethod: 'linkMethod',
-  issueDate: 'issueDate',
-  origin: 'origin',
-  destination: 'destination',
-  vehiclePlate: 'vehiclePlate',
-  driverIdentification: 'driverIdentification',
-  driverName: 'driverName',
-  data: 'data',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-} as const
-
-export type SupportingDocumentScalarFieldEnum = (typeof SupportingDocumentScalarFieldEnum)[keyof typeof SupportingDocumentScalarFieldEnum]
-
-
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -1601,13 +1501,6 @@ export const NullableJsonNullValueInput = {
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
-
-
-export const JsonNullValueInput = {
-  JsonNull: JsonNull
-} as const
-
-export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {
@@ -1764,20 +1657,6 @@ export type BytesFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, '
  * Reference to a field of type 'Bytes[]'
  */
 export type ListBytesFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Bytes[]'>
-    
-
-
-/**
- * Reference to a field of type 'DocumentType'
- */
-export type EnumDocumentTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocumentType'>
-    
-
-
-/**
- * Reference to a field of type 'DocumentType[]'
- */
-export type ListEnumDocumentTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocumentType[]'>
     
 
 
@@ -1970,7 +1849,6 @@ export type GlobalOmitConfig = {
   manifestProcessing?: Prisma.ManifestProcessingOmit
   manifestJob?: Prisma.ManifestJobOmit
   manifestFieldCorrection?: Prisma.ManifestFieldCorrectionOmit
-  supportingDocument?: Prisma.SupportingDocumentOmit
 }
 
 /* Types for Logging */

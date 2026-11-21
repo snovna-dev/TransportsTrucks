@@ -32,15 +32,6 @@ export const ManifestJobStatus = {
 export type ManifestJobStatus = (typeof ManifestJobStatus)[keyof typeof ManifestJobStatus]
 
 
-export const DocumentType = {
-  MANIFEST: 'MANIFEST',
-  REMITTANCE: 'REMITTANCE',
-  LOADING_ORDER: 'LOADING_ORDER'
-} as const
-
-export type DocumentType = (typeof DocumentType)[keyof typeof DocumentType]
-
-
 export const ExtractionReviewStatus = {
   PENDING: 'PENDING',
   IN_REVIEW: 'IN_REVIEW',

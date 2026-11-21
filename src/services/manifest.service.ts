@@ -7,7 +7,6 @@ import {
 } from "../generated/prisma/enums";
 import type { PrismaClient } from "../generated/prisma/client";
 import type { ExtractedField, ManifestExtraction } from "../types/manifest-extraction";
-import { linkDocumentsForManifest } from "./supporting-document.service";
 
 export interface PersistManifestInput {
     extractionResult: Pick<
@@ -217,7 +216,7 @@ async function findExistingManifest(
  * Guarda (o sobrescribe, si ya existe el mismo número de manifiesto o de
  * autorización) el Manifest con su carga y entidades relacionadas.
  */
-async function persistManifestRecord(
+export async function persistManifest(
     input: PersistManifestInput,
 ): Promise<PersistManifestResult> {
     const { extractionResult } = input;
@@ -380,19 +379,4 @@ async function persistManifestRecord(
             overallConfidence: extractionResult.overallConfidence,
         };
     });
-}
-
-/**
- * Guarda el manifiesto y, ya confirmado, vincula las remesas y órdenes de
- * cargue que se habían cargado antes y le pertenecen. La vinculación es un
- * complemento: si falla, el manifiesto igual queda guardado.
- */
-export async function persistManifest(input: PersistManifestInput): Promise<PersistManifestResult> {
-    const result = await persistManifestRecord(input);
-    try {
-        await linkDocumentsForManifest(result.manifestId);
-    } catch (error) {
-        console.error(`linkDocumentsForManifest(${result.manifestId})`, error);
-    }
-    return result;
 }

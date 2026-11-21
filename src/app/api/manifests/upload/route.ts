@@ -10,6 +10,8 @@ import {
   updateManifestJobStorage,
 } from "../../../../services/manifest-job.service";
 import { processManifestJob } from "../../../../services/processing.service";
+import { extractPdfText, PdfExtractionError } from "../../../../lib/manifiestos_parser/pdf";
+import { checkManifestDocument } from "../../../../lib/manifiestos_parser/document-check";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -50,6 +52,17 @@ export async function POST(request: Request) {
     const buffer = Buffer.from(await file.arrayBuffer());
     if (!isPdf(buffer)) {
       return errorResponse("El archivo no tiene una firma PDF válida.", 400);
+    }
+
+    // Solo se aceptan manifiestos: una remesa, una orden de cargue u otro
+    // documento se rechaza aquí, sin guardar el archivo ni crear el cargue.
+    try {
+      const pdf = await extractPdfText(buffer);
+      const check = checkManifestDocument(pdf.text);
+      if (!check.ok) return errorResponse(check.reason, 422, { notManifest: true });
+    } catch (error) {
+      if (error instanceof PdfExtractionError) return errorResponse(error.message, 422);
+      throw error;
     }
 
     const fileHash = createHash("sha256").update(buffer).digest("hex");
@@ -116,10 +129,6 @@ export async function POST(request: Request) {
         overallConfidence: result.overallConfidence,
         blockingFields: result.blockingFields,
         error: result.error,
-        documentType: result.documentType ?? "MANIFEST",
-        supportingDocumentId: result.supportingDocumentId ?? null,
-        linkedManifestId: result.linkedManifestId ?? null,
-        linkedManifestNumber: result.linkedManifestNumber ?? null,
       },
       { status: result.status === "ERROR" ? 500 : 201 },
     );

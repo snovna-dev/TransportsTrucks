@@ -26,9 +26,9 @@ Carga de PDF de manifiestos electrónicos de carga (RNDC), extracción automáti
 |---|---|
 | `/manifests/upload` | Cargar un PDF; muestra el resultado y enlaza a la revisión o al manifiesto. |
 | `/manifests` | Cargues pendientes o con error (con botón Reprocesar) y listado de manifiestos con búsqueda. |
-| `/manifests/[id]` | Detalle del manifiesto, PDF original, remesa y orden de cargue vinculadas, correcciones manuales y cargues. |
+| `/manifests/[id]` | Detalle del manifiesto, PDF original, correcciones manuales y cargues. |
 | `/manifests/review` | Cargues en `REVIEW_REQUIRED` o `ERROR`. |
-| `/manifests/review/[jobId]` | Para una remesa u orden de cargue: sus datos y el vínculo con el manifiesto. Para un manifiesto: revisión en dos paneles. Se resaltan los campos dudosos; los demás se pueden editar con “Ver y editar todos los campos”. |
+| `/manifests/review/[jobId]` | Revisión en dos paneles. Se resaltan los campos dudosos; los demás se pueden editar con “Ver y editar todos los campos”. |
 
 ## API
 
@@ -41,7 +41,6 @@ Carga de PDF de manifiestos electrónicos de carga (RNDC), extracción automáti
 | `POST /api/manifest-jobs/[id]/complete` | Aplica `values` (opcional), confirma lo demás y guarda el Manifest. |
 | `POST /api/manifest-jobs/[id]/process` | Reprocesa (`?force=1` vuelve a extraer un job en revisión). |
 | `GET /api/manifest-jobs/[id]/pdf` | PDF original (sin enlaces públicos de Drive). |
-| `PUT /api/supporting-documents/[id]/link` | `{ "manifestNumber": "597813" }` vincula a mano una remesa u orden de cargue (vacío quita el vínculo). |
 | `POST /api/manifest-jobs/worker?token=…` | Push de Pub/Sub (solo con `PROCESSING_MODE=pubsub`). |
 | `GET /api/google/drive/authorize` | Obtiene el refresh token de Drive (solo con `GOOGLE_OAUTH_SETUP_ENABLED=true`). |
 
@@ -65,18 +64,9 @@ Para probar uno o varios PDF sin base de datos:
 npm run test:parser:variants -- "manifiesto 1.pdf" "manifiesto 2.pdf" "manifiesto 3.pdf"
 ```
 
-## Remesas y órdenes de cargue (documentos soporte)
+## Solo manifiestos
 
-Se cargan por la misma pantalla que los manifiestos. El sistema reconoce el tipo de documento (`detectSupportingDocument` en `src/lib/manifiestos_parser/supporting-document-parser.ts`) y, en lugar de crear un manifiesto, guarda los datos en la tabla `supporting_documents` y los vincula al manifiesto del viaje:
-
-| Documento | Qué trae | Cómo se vincula |
-|---|---|---|
-| Remesa (OPL Carga) | No. Remesa, No. Mfto, remitente y destinatario con dirección, poseedor, conductor, carga (empaque, peso, N. pedido). | Por el número de manifiesto (No. Mfto) o por el número de remesa del manifiesto. |
-| Orden de cargue (OPL Carga) | ID Orden Carga, conductor (dirección, celular), vehículo (marca, modelo, motor, chasis, color, tráiler, capacidad), poseedor, remitente, destinatario y carga. | No trae el número de manifiesto: lo toma de la remesa del mismo viaje (misma placa, conductor y fecha) o busca el único manifiesto con esa placa y conductor entre 1 día antes y 3 días después. |
-
-Se pueden cargar en cualquier orden. Si el manifiesto aún no existe, el documento queda “sin vincular” en `/manifests` y se vincula solo al cargar el manifiesto. También se puede vincular a mano desde la pantalla del documento. Los documentos vinculados aparecen en el detalle del manifiesto.
-
-Requiere aplicar el esquema una vez (`npm run db:push`): agrega el enum `DocumentType`, la columna `manifest_jobs.document_type` y la tabla `supporting_documents`. No modifica ni borra datos existentes.
+El cargue acepta únicamente manifiestos de carga, que son los que traen la información del viaje y de los pagos. Antes de guardar el archivo se revisa que el PDF diga "MANIFIESTO" y traiga al menos tres conceptos de pago (valor total, retención, neto a pagar, anticipo, saldo); si no, se rechaza con un mensaje (`checkManifestDocument` en `src/lib/manifiestos_parser/document-check.ts`). Las remesas y órdenes de cargue se reconocen y se rechazan con un mensaje específico.
 
 ## Reglas de campos
 

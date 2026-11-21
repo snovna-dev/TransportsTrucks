@@ -2,12 +2,8 @@ import { prisma } from "../lib/prisma";
 import { readPdf } from "../lib/storage";
 import { ManifestJobStatus } from "../generated/prisma/enums";
 import { extractPdfText } from "../lib/manifiestos_parser/pdf";
-import {
-    detectSupportingDocument,
-    parseSupportingDocument,
-} from "../lib/manifiestos_parser/supporting-document-parser";
+import { checkManifestDocument } from "../lib/manifiestos_parser/document-check";
 import { extractManifestFromPdfData, type ExtractionAction } from "./extraction.service";
-import { saveSupportingDocument } from "./supporting-document.service";
 import { ManifestValidationError, persistManifest } from "./manifest.service";
 import { markManifestJobError, STALE_PROCESSING_MS } from "./manifest-job.service";
 import { toStoredExtraction } from "./stored-extraction";
@@ -22,11 +18,6 @@ export interface ProcessManifestJobResult {
     /** true si el job no se procesó porque ya estaba en otro estado (idempotencia). */
     skipped: boolean;
     error?: string;
-    /** Solo para remesas y órdenes de cargue. */
-    documentType?: "MANIFEST" | "REMITTANCE" | "LOADING_ORDER";
-    supportingDocumentId?: bigint;
-    linkedManifestId?: bigint | null;
-    linkedManifestNumber?: string | null;
 }
 
 export function manifestPdfUrl(jobId: bigint) {
@@ -109,30 +100,9 @@ export async function processManifestJob(
     try {
         const pdf = await extractPdfText(await readPdf(job));
 
-        // Remesas y órdenes de cargue no son manifiestos: se guardan como
-        // documentos soporte y se vinculan al manifiesto del viaje.
-        const supportingType = detectSupportingDocument(pdf.items[0]);
-        if (supportingType) {
-            const saved = await saveSupportingDocument({
-                jobId,
-                data: parseSupportingDocument(supportingType, pdf.items[0] ?? []),
-                rawText: pdf.fullText,
-                pageCount: pdf.pageCount,
-            });
-            return {
-                jobId,
-                status: ManifestJobStatus.COMPLETED,
-                manifestId: null,
-                overallConfidence: null,
-                action: null,
-                blockingFields: 0,
-                skipped: false,
-                documentType: supportingType,
-                supportingDocumentId: saved.supportingDocumentId,
-                linkedManifestId: saved.manifestId,
-                linkedManifestNumber: saved.manifestNumber,
-            };
-        }
+        // Solo se aceptan manifiestos (remesas, órdenes de cargue, etc. se rechazan).
+        const check = checkManifestDocument(pdf.text);
+        if (!check.ok) throw new Error(check.reason);
 
         const result = extractManifestFromPdfData(pdf);
         action = result.action;

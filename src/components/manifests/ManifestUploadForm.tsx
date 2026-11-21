@@ -13,12 +13,8 @@ interface UploadResponse {
   blockingFields?: number;
   message?: string;
   error?: string;
-  documentType?: "MANIFEST" | "REMITTANCE" | "LOADING_ORDER";
-  linkedManifestId?: string | null;
-  linkedManifestNumber?: string | null;
+  notManifest?: boolean;
 }
-
-const DOCUMENT_LABELS = { REMITTANCE: "Remesa", LOADING_ORDER: "Orden de cargue" } as const;
 
 export function ManifestUploadForm() {
   const [file, setFile] = useState<File | null>(null);
@@ -57,7 +53,7 @@ export function ManifestUploadForm() {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <label htmlFor="manifest-pdf" className="block text-sm font-medium">
-          PDF del manifiesto, la remesa o la orden de cargue
+          Manifiesto PDF
         </label>
         <input
           id="manifest-pdf"
@@ -74,7 +70,7 @@ export function ManifestUploadForm() {
         disabled={loading || !file}
         className="rounded-md bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800 disabled:opacity-50"
       >
-        {loading ? "Procesando el PDF..." : "Cargar PDF"}
+        {loading ? "Procesando el PDF..." : "Cargar manifiesto"}
       </button>
 
       {result && (
@@ -95,27 +91,6 @@ export function ManifestUploadForm() {
                       Ver
                     </Link>
                   )}
-                </p>
-              )}
-              {result.status === "COMPLETED" && result.documentType && result.documentType !== "MANIFEST" && result.jobId && (
-                <p>
-                  {DOCUMENT_LABELS[result.documentType]} guardada.{" "}
-                  {result.linkedManifestId ? (
-                    <>
-                      Quedó vinculada al{" "}
-                      <Link className="text-blue-700 underline" href={`/manifests/${result.linkedManifestId}`}>
-                        manifiesto {result.linkedManifestNumber}
-                      </Link>
-                      .
-                    </>
-                  ) : result.linkedManifestNumber ? (
-                    <>Pertenece al manifiesto {result.linkedManifestNumber}; se vinculará cuando lo cargue. </>
-                  ) : (
-                    <>Aún no se encontró su manifiesto; se vinculará cuando lo cargue. </>
-                  )}{" "}
-                  <Link className="text-blue-700 underline" href={`/manifests/review/${result.jobId}`}>
-                    Ver datos
-                  </Link>
                 </p>
               )}
               {result.status === "COMPLETED" && result.manifestId && (
@@ -139,7 +114,7 @@ export function ManifestUploadForm() {
           ) : (
             <>
               <p>{result.error}</p>
-              {result.jobId && (
+              {result.jobId && !result.notManifest && (
                 <p>
                   Puede reintentar desde{" "}
                   <Link className="underline" href="/manifests">

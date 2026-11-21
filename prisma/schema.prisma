@@ -26,13 +26,6 @@ enum ManifestJobStatus {
   ERROR
 }
 
-// Tipo de PDF cargado: el manifiesto o un documento soporte del viaje.
-enum DocumentType {
-  MANIFEST
-  REMITTANCE
-  LOADING_ORDER
-}
-
 enum ExtractionReviewStatus {
   PENDING
   IN_REVIEW
@@ -196,7 +189,6 @@ model Manifest {
   processing            ManifestProcessing?
   jobs                  ManifestJob[]
   corrections           ManifestFieldCorrection[]
-  supportingDocuments   SupportingDocument[]
 
   @@index([companyId])
   @@index([issueDate])
@@ -272,7 +264,6 @@ model ManifestJob {
   overallConfidence Decimal?         @map("overall_confidence") @db.Decimal(5, 4)
 
   manifestId       BigInt?           @map("manifest_id")
-  documentType     DocumentType      @default(MANIFEST) @map("document_type")
   status           ManifestJobStatus @default(UPLOADED)
   attempts         Int               @default(0)
   errorMessage     String?           @map("error_message")
@@ -283,9 +274,8 @@ model ManifestJob {
   completedAt      DateTime?         @map("completed_at") @db.Timestamp(6)
   reviewedAt       DateTime?         @map("reviewed_at") @db.Timestamp(6)
 
-  manifest           Manifest? @relation(fields: [manifestId], references: [id], onDelete: SetNull)
-  corrections        ManifestFieldCorrection[]
-  supportingDocument SupportingDocument?
+  manifest    Manifest? @relation(fields: [manifestId], references: [id], onDelete: SetNull)
+  corrections ManifestFieldCorrection[]
 
   @@index([status])
   @@index([createdAt])
@@ -312,40 +302,4 @@ model ManifestFieldCorrection {
   @@index([jobId])
   @@index([manifestId])
   @@map("manifest_field_corrections")
-}
-
-// Documentos soporte del viaje (remesa, orden de cargue). Se guardan aparte del
-// manifiesto y se vinculan a él por número de manifiesto, número de remesa o
-// por coincidencia de placa, conductor y fecha.
-model SupportingDocument {
-  id                   BigInt       @id @default(autoincrement())
-  jobId                BigInt       @unique @map("job_id")
-  documentType         DocumentType @map("document_type")
-  documentNumber       String       @map("document_number") @db.VarChar(50)
-  companyNit           String?      @map("company_nit") @db.VarChar(30)
-  companyName          String?      @map("company_name") @db.VarChar(200)
-  // Número de manifiesto que trae el documento (o que se le asignó al vincularlo).
-  manifestNumber       String?      @map("manifest_number") @db.VarChar(50)
-  manifestId           BigInt?      @map("manifest_id")
-  // MANIFEST_NUMBER, REMITTANCE_NUMBER, TRIP_MATCH o MANUAL.
-  linkMethod           String?      @map("link_method") @db.VarChar(30)
-  issueDate            DateTime?    @map("issue_date") @db.Date
-  origin               String?      @db.VarChar(150)
-  destination          String?      @db.VarChar(150)
-  vehiclePlate         String?      @map("vehicle_plate") @db.VarChar(10)
-  driverIdentification String?      @map("driver_identification") @db.VarChar(50)
-  driverName           String?      @map("driver_name") @db.VarChar(200)
-  // Todos los datos extraídos del PDF (SupportingDocumentData).
-  data                 Json
-  createdAt            DateTime     @default(now()) @map("created_at") @db.Timestamp(6)
-  updatedAt            DateTime?    @map("updated_at") @db.Timestamp(6)
-
-  job      ManifestJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
-  manifest Manifest?   @relation(fields: [manifestId], references: [id], onDelete: SetNull)
-
-  @@index([documentType, documentNumber])
-  @@index([manifestNumber])
-  @@index([manifestId])
-  @@index([vehiclePlate, issueDate])
-  @@map("supporting_documents")
 }
