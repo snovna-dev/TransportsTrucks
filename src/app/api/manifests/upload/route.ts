@@ -116,6 +116,10 @@ export async function POST(request: Request) {
         overallConfidence: result.overallConfidence,
         blockingFields: result.blockingFields,
         error: result.error,
+        documentType: result.documentType ?? "MANIFEST",
+        supportingDocumentId: result.supportingDocumentId ?? null,
+        linkedManifestId: result.linkedManifestId ?? null,
+        linkedManifestNumber: result.linkedManifestNumber ?? null,
       },
       { status: result.status === "ERROR" ? 500 : 201 },
     );

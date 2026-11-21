@@ -9,6 +9,9 @@ import { getReviewData } from "../../../../services/review.service";
 import { ManifestReview, type ReviewFieldView } from "../../../../components/manifests/ManifestReview";
 import { ManifestStatus } from "../../../../components/manifests/ManifestStatus";
 import { ReprocessButton } from "../../../../components/manifests/ReprocessButton";
+import { SupportingDocumentView } from "../../../../components/manifests/SupportingDocumentView";
+import { documentTypeLabel } from "../../../../components/manifests/SupportingDocumentList";
+import { parseStoredSupportingDocument } from "../../../../services/supporting-document.service";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +22,40 @@ export default async function ReviewJobPage({ params }: { params: Promise<{ jobI
   const data = await getReviewData(id);
   if (!data) notFound();
   const { job, stored, evaluation } = data;
+
+  // Remesa u orden de cargue: no se revisan campo por campo, se muestran sus
+  // datos y su vínculo con el manifiesto.
+  const supporting = parseStoredSupportingDocument(job.extractedJson);
+  if (job.documentType !== "MANIFEST" || supporting) {
+    const typeLabel = documentTypeLabel(job.supportingDocument?.documentType ?? supporting?.documentType ?? job.documentType);
+    return (
+      <main className="mx-auto max-w-[1600px] px-6 py-6">
+        <div className="mb-4 flex flex-wrap items-center gap-3">
+          <Link href="/manifests" className="text-sm text-blue-700 hover:underline">
+            ← Volver
+          </Link>
+          <h1 className="text-xl font-semibold">
+            {typeLabel}: {job.originalFileName}
+          </h1>
+          <ManifestStatus status={job.status} />
+          {job.status === "ERROR" && (
+            <span className="ml-auto">
+              <ReprocessButton jobId={job.id.toString()} label="Volver a procesar" />
+            </span>
+          )}
+        </div>
+        {job.errorMessage && (
+          <p className="mb-4 rounded border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">{job.errorMessage}</p>
+        )}
+        <div className="grid gap-6 lg:grid-cols-2">
+          <div className="h-[80vh] overflow-hidden rounded-md border lg:sticky lg:top-4">
+            <iframe src={`/api/manifest-jobs/${job.id}/pdf`} title={`PDF de la ${typeLabel.toLowerCase()}`} className="h-full w-full" />
+          </div>
+          <SupportingDocumentView document={job.supportingDocument} data={supporting?.document ?? null} />
+        </div>
+      </main>
+    );
+  }
 
   const flags = new Map(
     (evaluation?.reviewFields ?? []).map((field) => [field.path, field.required ? "blocking" : "warning"] as const),

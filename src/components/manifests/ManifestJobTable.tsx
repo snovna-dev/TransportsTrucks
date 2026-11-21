@@ -2,6 +2,7 @@ import Link from "next/link";
 import { formatDateTime, formatPercent } from "../../lib/format";
 import { ManifestStatus } from "./ManifestStatus";
 import { ReprocessButton } from "./ReprocessButton";
+import { documentTypeLabel } from "./SupportingDocumentList";
 
 export interface ManifestJobRow {
   id: bigint;
@@ -12,6 +13,7 @@ export interface ManifestJobRow {
   errorMessage: string | null;
   createdAt: Date;
   manifest: { id: bigint; manifestNumber: string } | null;
+  documentType?: string;
 }
 
 export function ManifestJobTable({ rows, emptyText }: { rows: ManifestJobRow[]; emptyText?: string }) {
@@ -42,6 +44,9 @@ export function ManifestJobTable({ rows, emptyText }: { rows: ManifestJobRow[]; 
                 <a href={`/api/manifest-jobs/${row.id}/pdf`} target="_blank" className="text-blue-700 hover:underline">
                   {row.originalFileName}
                 </a>
+                {row.documentType && row.documentType !== "MANIFEST" && (
+                  <div className="text-xs text-slate-500">{documentTypeLabel(row.documentType)}</div>
+                )}
                 {row.errorMessage && <div className="mt-1 max-w-md text-xs text-red-700">{row.errorMessage}</div>}
               </td>
               <td className="px-3 py-2 whitespace-nowrap">{formatDateTime(row.createdAt)}</td>
@@ -50,6 +55,11 @@ export function ManifestJobTable({ rows, emptyText }: { rows: ManifestJobRow[]; 
                 <ManifestStatus status={row.status} />
               </td>
               <td className="px-3 py-2 whitespace-nowrap">
+                {row.documentType && row.documentType !== "MANIFEST" && row.status !== "ERROR" && (
+                  <Link href={`/manifests/review/${row.id}`} className="text-blue-700 hover:underline">
+                    Ver datos
+                  </Link>
+                )}
                 {row.status === "REVIEW_REQUIRED" && (
                   <Link href={`/manifests/review/${row.id}`} className="font-medium text-blue-700 hover:underline">
                     Revisar

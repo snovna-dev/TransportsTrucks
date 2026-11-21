@@ -4,6 +4,8 @@ import { ManifestJobStatus } from "../../generated/prisma/enums";
 import { listManifestJobs } from "../../services/manifest-job.service";
 import { ManifestTable } from "../../components/manifests/ManifestTable";
 import { ManifestJobTable } from "../../components/manifests/ManifestJobTable";
+import { SupportingDocumentList } from "../../components/manifests/SupportingDocumentList";
+import { listSupportingDocuments } from "../../services/supporting-document.service";
 
 export const dynamic = "force-dynamic";
 
@@ -14,7 +16,7 @@ export default async function ManifestsPage({
 }) {
   const q = (await searchParams).q?.trim() ?? "";
 
-  const [manifests, pendingJobs] = await Promise.all([
+  const [manifests, pendingJobs, unlinkedDocuments] = await Promise.all([
     prisma.manifest.findMany({
       where: q
         ? {
@@ -52,6 +54,7 @@ export default async function ManifestsPage({
         ManifestJobStatus.ERROR,
       ],
     }),
+    listSupportingDocuments({ unlinkedOnly: true, take: 50 }),
   ]);
 
   return (
@@ -65,6 +68,16 @@ export default async function ManifestsPage({
         </div>
         <ManifestJobTable rows={pendingJobs} emptyText="No hay cargues pendientes ni con error." />
       </section>
+
+      {unlinkedDocuments.length > 0 && (
+        <section>
+          <h2 className="mb-1 text-xl font-semibold">Remesas y órdenes de cargue sin vincular</h2>
+          <p className="mb-3 text-sm text-slate-600">
+            Se vinculan solas cuando se carga su manifiesto. También puede indicar el número a mano.
+          </p>
+          <SupportingDocumentList rows={unlinkedDocuments} />
+        </section>
+      )}
 
       <section>
         <div className="mb-3 flex flex-wrap items-center justify-between gap-3">

@@ -96,3 +96,8 @@ export type ManifestJob = Prisma.ManifestJobModel
  * 
  */
 export type ManifestFieldCorrection = Prisma.ManifestFieldCorrectionModel
+/**
+ * Model SupportingDocument
+ * 
+ */
+export type SupportingDocument = Prisma.SupportingDocumentModel

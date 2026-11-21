@@ -1,4 +1,4 @@
-import { extractPdfText } from "../lib/manifiestos_parser/pdf";
+import { extractPdfText, type PdfExtractionResult } from "../lib/manifiestos_parser/pdf";
 import {
   parseManifestDocument,
   summarizeConfidence,
@@ -178,8 +178,11 @@ function completeFromOtherPages(extraction: ManifestExtraction, pageTexts: strin
 export async function extractManifestFromPdf(
   input: Buffer | Uint8Array,
 ): Promise<ExtractionServiceResult> {
-  const pdf = await extractPdfText(input);
+  return extractManifestFromPdfData(await extractPdfText(input));
+}
 
+/** Igual que extractManifestFromPdf, pero con el texto del PDF ya extraído. */
+export function extractManifestFromPdfData(pdf: PdfExtractionResult): ExtractionServiceResult {
   let extraction: ManifestExtraction;
   let variant: ManifestVariant;
   try {

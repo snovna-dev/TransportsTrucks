@@ -220,7 +220,20 @@ export async function getReviewData(jobId: bigint) {
             extractedJson: true,
             createdAt: true,
             manifestId: true,
+            documentType: true,
             corrections: { orderBy: { createdAt: "asc" } },
+            supportingDocument: {
+                select: {
+                    id: true,
+                    documentType: true,
+                    documentNumber: true,
+                    manifestNumber: true,
+                    manifestId: true,
+                    linkMethod: true,
+                    data: true,
+                    manifest: { select: { id: true, manifestNumber: true } },
+                },
+            },
         },
     });
     if (!job) return null;

@@ -173,6 +173,7 @@ export const manifestJobPublicSelect = {
   driveFileUrl: true,
   overallConfidence: true,
   manifestId: true,
+  documentType: true,
   status: true,
   attempts: true,
   errorMessage: true,
@@ -194,9 +195,19 @@ export async function listManifestJobs(input: {
     select: {
       ...manifestJobPublicSelect,
       manifest: { select: { id: true, manifestNumber: true } },
+      supportingDocument: { select: supportingDocumentSummarySelect },
     },
   });
 }
+
+const supportingDocumentSummarySelect = {
+  id: true,
+  documentType: true,
+  documentNumber: true,
+  manifestId: true,
+  manifestNumber: true,
+  linkMethod: true,
+} as const;
 
 export async function getManifestJob(jobId: bigint) {
   return prisma.manifestJob.findUnique({
@@ -206,6 +217,7 @@ export async function getManifestJob(jobId: bigint) {
       rawText: true,
       extractedJson: true,
       manifest: { select: { id: true, manifestNumber: true } },
+      supportingDocument: { select: supportingDocumentSummarySelect },
       corrections: { orderBy: { createdAt: "asc" } },
     },
   });
