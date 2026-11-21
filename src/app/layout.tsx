@@ -20,6 +20,9 @@ export default function RootLayout({
             <Link href="/manifests" className="font-semibold">
               TransportsTrucks
             </Link>
+            <Link href="/dashboard" className="text-slate-300 hover:text-white">
+              Dashboard
+            </Link>
             <Link href="/manifests" className="text-slate-300 hover:text-white">
               Manifiestos
             </Link>
