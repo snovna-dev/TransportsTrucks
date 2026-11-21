@@ -14,7 +14,18 @@ function createPrismaClient(): PrismaClient {
         throw new Error("DATABASE_URL no está definida.");
     }
 
-    return new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
+    // Clever Cloud (plan gratuito/dev) solo permite unas 5 conexiones por base.
+    // pg usa 10 por defecto, así que se limita el pool y se liberan las
+    // conexiones inactivas rápido. Ajustable con DATABASE_POOL_MAX.
+    const max = Number(process.env.DATABASE_POOL_MAX ?? 2);
+    const adapter = new PrismaPg({
+        connectionString,
+        max: Number.isFinite(max) && max > 0 ? max : 2,
+        idleTimeoutMillis: 10_000,
+        connectionTimeoutMillis: 15_000,
+    });
+
+    return new PrismaClient({ adapter });
 }
 
 export function getPrisma(): PrismaClient {
